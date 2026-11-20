@@ -1,0 +1,19 @@
+# Netlify Configuration for Ashtatic Internet Solution
+[build]
+  publish = "public"
+
+# Pretty URL Redirects
+[[redirects]]
+  from = "/tracking"
+  to = "/tracking.html"
+  status = 200
+
+[[redirects]]
+  from = "/admin"
+  to = "/admin.html"
+  status = 200
+
+[[redirects]]
+  from = "/beranda"
+  to = "/index.html"
+  status = 200
