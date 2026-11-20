@@ -376,7 +376,7 @@ function bindTableActions() {
       const ticket = btn.getAttribute("data-ticket");
       const confirmed = await showCustomConfirm(
         "Hapus Data Permanen?",
-        `Apakah Anda yakin ingin menghapus tiket ${ticket} secara PERMANEN? Data ini akan langsung dimusnahkan dari Firebase Firestore dan database server selamanya.`,
+        `Apakah Anda yakin ingin menghapus tiket ${ticket} secara PERMANEN? Data ini akan langsung dimusnahkan dari sistem database selamanya.`,
         "Ya, Hapus Permanen",
         "Batal"
       );
@@ -562,7 +562,7 @@ async function deleteRegistration(ticketId) {
       adminRegistrations = adminRegistrations.filter(d => d.ticketId !== ticketId);
       renderMetrics(adminRegistrations);
       renderTable();
-      showToast(`Data tiket ${ticketId} telah terhapus PERMANEN dari Firestore & Server!`, "success", 4000);
+      showToast(`Data tiket ${ticketId} telah terhapus PERMANEN dari sistem database!`, "success", 4000);
     } else {
       showToast("Gagal menghapus data tiket secara permanen.", "error");
     }
