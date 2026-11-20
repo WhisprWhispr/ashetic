@@ -1,0 +1,25 @@
+{
+  "name": "ashtatic-internet",
+  "version": "1.0.0",
+  "description": "Website Resmi Ashtatic Internet Solution - Solusi Internet Cepat, Stabil & Tanpa Kabel",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "ashtatic",
+    "wifi-airpro",
+    "internet-provider",
+    "firebase",
+    "firestore"
+  ],
+  "author": "Ashtatic Internet Solution",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7"
+  }
+}

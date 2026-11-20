@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>Ashtatic Internet Solution | Solusi Wifi AirPro Tanpa Kabel</title>
+  <meta name="description" content="Ashtatic Internet Solution - Solusi Internet Modern Cepat & Stabil dengan Teknologi WiFi AirPro Tanpa Kabel. Bulan Pertama Gratis & Bebas Biaya Instalasi!">
+  <meta name="theme-color" content="#040816">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="alternate icon" href="/favicon.svg">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            cyberDark: '#040816',
+            cyberNavy: '#081026',
+            cyberCard: 'rgba(10, 20, 48, 0.75)',
+            cyberCyan: '#00f0ff',
+            cyberBlue: '#0072ff',
+            cyberPurple: '#7928ca'
+          },
+          screens: {
+            'xs': '420px'
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Font Awesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-[#040816] text-slate-100 min-h-screen relative cyber-grid selection:bg-cyan-500 selection:text-black">
+
+  <!-- ======================================================== -->
+  <!-- HEADER / NAVIGATION (STICKY & RESPONSIVE) -->
+  <!-- ======================================================== -->
+  <header class="fixed top-0 left-0 right-0 z-50 bg-[#040816]/90 backdrop-blur-md border-b border-cyan-500/20 transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
+      
+      <!-- Logo -->
+      <a href="/" class="flex items-center gap-2 group shrink-0">
+        <img src="/images/logo.svg" alt="Ashtatic Internet Solution" class="h-8 sm:h-11 w-auto transition-transform group-hover:scale-105">
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <nav class="hidden lg:flex items-center gap-7 text-sm font-medium">
+        <a href="#beranda" class="text-cyan-400 font-bold hover:text-cyan-300 transition">Beranda</a>
+        <a href="#airpro" class="text-slate-300 hover:text-cyan-400 transition">Wifi AirPro</a>
+        <a href="#paket" class="text-slate-300 hover:text-cyan-400 transition">Pilihan Paket</a>
+        <a href="#keunggulan" class="text-slate-300 hover:text-cyan-400 transition">Keunggulan</a>
+        <a href="/tracking" class="text-slate-300 hover:text-cyan-400 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-satellite-dish text-cyan-400 text-xs"></i> Lacak Status
+        </a>
+        <a href="/admin" class="text-slate-400 hover:text-purple-300 transition text-xs font-semibold px-2.5 py-1 rounded-md border border-purple-500/30 hover:border-purple-500/60 flex items-center gap-1">
+          <i class="fa-solid fa-lock text-[10px]"></i> Admin
+        </a>
+      </nav>
+
+      <!-- CTA Header -->
+      <div class="hidden sm:flex items-center gap-3">
+        <button class="px-5 py-2.5 rounded-xl btn-neon-cyan text-xs font-extrabold uppercase tracking-wider btn-open-register shadow-lg" data-package="150mbps">
+          <i class="fa-solid fa-bolt mr-1.5"></i> Pasang Baru
+        </button>
+      </div>
+
+      <!-- Mobile Hamburger Button -->
+      <div class="flex items-center gap-2 lg:hidden">
+        <button class="sm:hidden px-2.5 py-1.5 rounded-lg btn-neon-cyan text-[11px] font-extrabold uppercase btn-open-register" data-package="150mbps">
+          Daftar
+        </button>
+        <button id="mobileMenuBtn" aria-label="Menu" class="text-cyan-400 p-2 text-2xl focus:outline-none rounded-lg hover:bg-slate-900 transition">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="mobileMenu" class="hidden lg:hidden bg-[#060d20] border-b border-cyan-500/30 px-5 py-5 flex flex-col gap-3.5 text-sm font-medium shadow-2xl animate-fade-in">
+      <a href="#beranda" class="text-cyan-400 font-bold py-1.5 border-b border-slate-800/80">Beranda</a>
+      <a href="#airpro" class="text-slate-300 py-1.5 border-b border-slate-800/80">Wifi AirPro Tanpa Kabel</a>
+      <a href="#paket" class="text-slate-300 py-1.5 border-b border-slate-800/80">Pilihan Paket 100/150/200 Mbps</a>
+      <a href="#keunggulan" class="text-slate-300 py-1.5 border-b border-slate-800/80">Keunggulan Ashtatic</a>
+      <a href="/tracking" class="text-cyan-300 font-semibold py-1.5 border-b border-slate-800/80 flex items-center gap-2">
+        <i class="fa-solid fa-satellite-dish text-cyan-400"></i> Lacak Status Pendaftaran
+      </a>
+      <a href="/admin" class="text-purple-300 font-semibold py-1.5 border-b border-slate-800/80 flex items-center gap-2">
+        <i class="fa-solid fa-lock text-purple-400"></i> Panel Admin Pengelola
+      </a>
+      
+      <div class="pt-2">
+        <button class="w-full py-3 rounded-xl btn-neon-cyan text-xs font-extrabold uppercase tracking-wider btn-open-register shadow-lg" data-package="150mbps">
+          <i class="fa-solid fa-file-signature mr-1.5"></i> Formulir Pasang Baru
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ======================================================== -->
+  <!-- MAIN CONTENT CONTAINER -->
+  <!-- ======================================================== -->
+  <main class="pt-20 sm:pt-24 lg:pt-28">
+
+    <!-- HERO SECTION -->
+    <section id="beranda" class="relative overflow-hidden py-10 sm:py-16 lg:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+        
+        <!-- Left Hero Copy -->
+        <div class="lg:col-span-7 space-y-5 sm:space-y-6 text-center lg:text-left z-10">
+          
+          <!-- Modern Tech Pill -->
+          <div class="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-400/40 text-cyan-300 text-[11px] sm:text-xs font-bold uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping shrink-0"></span>
+            TEKNOLOGI AIRPRO WIRELESS TERBARU
+          </div>
+
+          <!-- Main Catchphrase matching poster -->
+          <h1 class="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
+            Internet Cepat &amp; Stabil
+            <span class="block text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-500 text-glow-cyan mt-1">
+              Untuk Aktivitas Online Tanpa Hambatan!
+            </span>
+          </h1>
+
+          <!-- Tagline matching poster -->
+          <p class="text-slate-300 text-sm sm:text-base md:text-lg leading-relaxed max-w-2xl mx-auto lg:mx-0 font-normal">
+            <strong class="text-cyan-300">Koneksi Cepat, Aktivitas Tanpa Batas!</strong> Nikmati teknologi internet modern dengan 
+            <span class="text-white font-semibold underline decoration-cyan-400 underline-offset-4">WiFi AirPro Tanpa Kabel</span>. 
+            Lebih praktis, bebas tarik kabel tiang, instalasi kilat, dan sinyal super stabil untuk keluarga &amp; bisnis.
+          </p>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-col xs:flex-row items-center justify-center lg:justify-start gap-3 pt-2">
+            <button class="w-full xs:w-auto px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl btn-neon-cyan text-xs sm:text-sm font-extrabold tracking-wide uppercase flex items-center justify-center gap-2 btn-open-register shadow-lg" data-package="150mbps">
+              <i class="fa-solid fa-bolt text-black text-sm sm:text-base"></i>
+              Daftar Pasang Baru
+            </button>
+            <a href="/tracking" class="w-full xs:w-auto px-5 sm:px-6 py-3.5 sm:py-4 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-cyan-500/30 text-cyan-300 hover:text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition">
+              <i class="fa-solid fa-satellite-dish"></i>
+              Lacak Status Pendaftaran
+            </a>
+          </div>
+
+          <!-- Hero Highlights / Key Stats -->
+          <div class="grid grid-cols-3 gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-slate-800/80 max-w-lg mx-auto lg:mx-0">
+            <div class="p-2.5 sm:p-3 rounded-xl bg-slate-900/60 border border-cyan-500/20 text-center">
+              <div class="text-lg sm:text-2xl font-extrabold text-cyan-400 font-tech">100%</div>
+              <div class="text-[10px] sm:text-xs text-slate-400">Tanpa Kabel Optik</div>
+            </div>
+            <div class="p-2.5 sm:p-3 rounded-xl bg-slate-900/60 border border-purple-500/20 text-center">
+              <div class="text-lg sm:text-2xl font-extrabold text-purple-400 font-tech">&lt; 15ms</div>
+              <div class="text-[10px] sm:text-xs text-slate-400">Low Ping Gaming</div>
+            </div>
+            <div class="p-2.5 sm:p-3 rounded-xl bg-slate-900/60 border border-emerald-500/20 text-center">
+              <div class="text-lg sm:text-2xl font-extrabold text-emerald-400 font-tech">99.9%</div>
+              <div class="text-[10px] sm:text-xs text-slate-400">Uptime Jaringan</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Hero Visual (Modem Wifi AirPro matching poster) -->
+        <div class="lg:col-span-5 relative flex items-center justify-center mt-4 lg:mt-0">
+          <div class="relative w-full max-w-sm sm:max-w-md p-4 sm:p-6 glass-card rounded-2xl sm:rounded-3xl border border-cyan-500/30 glow-cyan">
+            
+            <!-- Badge Promo Floating Top Right -->
+            <div class="absolute -top-3.5 -right-2 sm:-right-4 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-extrabold text-[10px] sm:text-xs shadow-lg uppercase tracking-wider animate-bounce flex items-center gap-1.5 z-20">
+              <i class="fa-solid fa-bullhorn text-xs sm:text-sm"></i>
+              <span>Bulan ke-1 Gratis!</span>
+            </div>
+
+            <!-- Modem SVG Illustration -->
+            <div class="animate-float py-2">
+              <img src="/images/airpro-router.svg" alt="Modem Wifi AirPro Ashtatic" class="w-full h-auto drop-shadow-2xl">
+            </div>
+
+            <!-- Device Specs Box -->
+            <div class="mt-2 sm:mt-4 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-950/80 border border-cyan-400/20 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-cyan-300 flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                  WiFi AirPro Device
+                </span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-950 border border-cyan-500/40 text-cyan-300 font-mono">Ready Stock</span>
+              </div>
+              <p class="text-[11px] sm:text-xs text-slate-300 leading-snug">
+                Teknologi sinyal nirkabel terdedikasi, jangkauan luas tembus sekat dinding. Langsung aktif tanpa menunggu penggalian kabel jalan.
+              </p>
+              <div class="pt-2 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-800">
+                <span>Free Peminjaman Modem</span>
+                <button id="posterThumbnail" class="text-cyan-400 hover:text-cyan-300 underline font-semibold flex items-center gap-1">
+                  <i class="fa-solid fa-image"></i> Brosur Poster Asli
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- PROMO BANNER SECTION (Matching "BULAN PERTAMA GRATIS! + GRATIS BIAYA INSTALASI PEMASANGAN!") -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+      <div class="relative overflow-hidden rounded-2xl sm:rounded-3xl p-5 sm:p-8 border-2 border-yellow-400/70 bg-gradient-to-r from-blue-950 via-purple-950 to-indigo-950 shadow-[0_0_35px_rgba(250,204,21,0.25)]">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-5 sm:gap-6 items-center">
+          
+          <div class="md:col-span-8 space-y-2 text-center md:text-left">
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-400/20 border border-yellow-400/50 text-yellow-300 text-[10px] sm:text-xs font-extrabold tracking-wide uppercase">
+              <i class="fa-solid fa-tag"></i> PROMO SPESIAL PEMASANGAN BARU
+            </div>
+            <h2 class="text-2xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-200 to-yellow-400 text-glow-yellow leading-tight">
+              BULAN PERTAMA GRATIS!
+            </h2>
+            <p class="text-cyan-200 font-bold text-sm sm:text-lg flex items-center justify-center md:justify-start gap-1.5">
+              <i class="fa-solid fa-circle-check text-yellow-400"></i>
+              + GRATIS BIAYA INSTALASI PEMASANGAN!
+            </p>
+            <p class="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto md:mx-0">
+              Khusus registrasi minggu ini. Pasang Wifi AirPro di rumah atau tempat usaha Anda tanpa biaya pendaftaran awal sepeserpun!
+            </p>
+          </div>
+
+          <div class="md:col-span-4 flex flex-col items-center md:items-end justify-center gap-2.5">
+            <button class="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-black font-extrabold text-xs sm:text-sm uppercase tracking-wider shadow-lg transition-all transform hover:scale-105 btn-open-register" data-package="150mbps">
+              Klaim Promo Sekarang
+            </button>
+            <span class="text-[10px] text-yellow-200/80 italic">*Kuota promo terbatas per kelurahan</span>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION WIFI AIRPRO (Solusi Internet Modern Tanpa Kabel) -->
+    <section id="airpro" class="py-12 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-10 sm:mb-12">
+        <h2 class="text-xs font-extrabold tracking-widest text-cyan-400 uppercase">INOVASI TERKINI</h2>
+        <p class="mt-2 text-2xl sm:text-4xl font-extrabold text-white">
+          Wifi AirPro <span class="text-cyan-400 text-glow-cyan">Tanpa Kabel!</span>
+        </p>
+        <p class="mt-2 text-slate-300 text-xs sm:text-base leading-relaxed">
+          Solusi Internet Modern dengan Teknologi WiFi AirPro, Tanpa Kabel, Lebih Praktis, Lebih Fleksibel!
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
+        <!-- Feature 1 -->
+        <div class="p-5 sm:p-6 rounded-2xl glass-card border border-cyan-500/20 space-y-3 sm:space-y-4">
+          <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-cyan-950/80 border border-cyan-400/40 flex items-center justify-center text-cyan-400 text-xl sm:text-2xl">
+            <i class="fa-solid fa-plug-circle-check"></i>
+          </div>
+          <h3 class="text-lg sm:text-xl font-bold text-white">Praktis Tanpa Tarik Kabel</h3>
+          <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+            Tidak perlu menunggu izin tanam tiang atau khawatir kabel fiber optik putus tersenggol truk. Colok ke listrik, internet langsung memancar cepat.
+          </p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="p-5 sm:p-6 rounded-2xl glass-card border border-purple-500/30 space-y-3 sm:space-y-4">
+          <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-purple-950/80 border border-purple-400/40 flex items-center justify-center text-purple-400 text-xl sm:text-2xl">
+            <i class="fa-solid fa-tower-broadcast"></i>
+          </div>
+          <h3 class="text-lg sm:text-xl font-bold text-white">Sinyal Udara Super Stabil</h3>
+          <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+            Frekuensi terdedikasi bebas hambatan interferensi, menjamin streaming resolusi tinggi tanpa buffering dan gaming bebas lonjakan ping.
+          </p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="p-5 sm:p-6 rounded-2xl glass-card border border-blue-500/20 space-y-3 sm:space-y-4">
+          <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-blue-950/80 border border-blue-400/40 flex items-center justify-center text-blue-400 text-xl sm:text-2xl">
+            <i class="fa-solid fa-arrows-split-up-and-left"></i>
+          </div>
+          <h3 class="text-lg sm:text-xl font-bold text-white">Fleksibel &amp; Portabel</h3>
+          <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+            Pindah ruangan, atur ulang posisi meja, atau renovasi ruko tanpa repot instalasi ulang soket optik yang rawan patah.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION PILIHAN PAKET INTERNET (Matching the 3 Items in Poster Exactly) -->
+    <section id="paket" class="py-12 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+      
+      <!-- Section Header -->
+      <div class="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
+        <div class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-400/50 text-cyan-300 text-xs font-bold uppercase tracking-widest mb-2.5">
+          <i class="fa-solid fa-gauge-high"></i> PILIHAN PAKET INTERNET
+        </div>
+        <h2 class="text-2xl sm:text-4xl md:text-5xl font-extrabold text-white">
+          Tarif Bersahabat, <span class="text-cyan-400 text-glow-cyan">Koneksi Tanpa Batas</span>
+        </h2>
+        <p class="mt-2 text-slate-300 text-xs sm:text-sm">
+          Pilih kecepatan terbaik sesuai kebutuhan harian keluarga maupun aktivitas usaha Anda.
+        </p>
+      </div>
+
+      <!-- Pricing Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 items-stretch">
+
+        <!-- PAKET 1: 100 Mbps (Rp 105.000 / Bulan) -->
+        <div class="relative rounded-2xl sm:rounded-3xl p-5 sm:p-7 glass-card border-2 border-cyan-400/50 flex flex-col justify-between hover:border-cyan-300 transition-all glow-cyan-sm">
+          
+          <div>
+            <!-- Header Paket -->
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-3 py-1 rounded-full text-xs font-bold bg-cyan-950 text-cyan-300 border border-cyan-400/40">
+                Hemat &amp; Terlaris
+              </span>
+              <div class="w-10 h-10 rounded-full bg-cyan-950 flex items-center justify-center text-cyan-400 border border-cyan-500/30">
+                <i class="fa-solid fa-gauge-high text-base"></i>
+              </div>
+            </div>
+
+            <!-- Speed Display -->
+            <div class="text-3xl sm:text-5xl font-black text-white font-tech tracking-tight">
+              100 <span class="text-xl sm:text-2xl text-cyan-400 font-bold">Mbps</span>
+            </div>
+
+            <!-- Price Display Matching Poster -->
+            <div class="mt-3 sm:mt-4 pb-5 border-b border-slate-800">
+              <div class="text-2xl sm:text-3xl font-extrabold text-cyan-300">
+                Rp 105.000
+                <span class="text-xs font-medium text-slate-400">/ Bulan</span>
+              </div>
+              <div class="text-xs text-yellow-400 font-semibold mt-1">
+                <i class="fa-solid fa-gift mr-1"></i> Bulan ke-1 GRATIS!
+              </div>
+            </div>
+
+            <!-- Fitur List -->
+            <ul class="mt-5 space-y-2.5 text-xs sm:text-sm text-slate-300">
+              <li class="flex items-center gap-2.5">
+                <i class="fa-solid fa-circle-check text-cyan-400 shrink-0"></i>
+                <span>Kecepatan simetris hingga 100 Mbps</span>
+              </li>
+              <li class="flex items-center gap-2.5">
+                <i class="fa-solid fa-circle-check text-cyan-400 shrink-0"></i>
+                <span>Ideal untuk <strong>3 - 5 Perangkat</strong></span>
+              </li>
+              <li class="flex items-center gap-2.5">
+                <i class="fa-solid fa-circle-check text-cyan-400 shrink-0"></i>
+                <span>Streaming Full HD &amp; browsing lancar</span>
+              </li>
+              <li class="flex items-center gap-2.5">
+                <i class="fa-solid fa-circle-check text-cyan-400 shrink-0"></i>
+                <span>Termasuk Modem Wifi AirPro Tanpa Kabel</span>
+              </li>
+              <li class="flex items-center gap-2.5">
+                <i class="fa-solid fa-circle-check text-cyan-400 shrink-0"></i>
+                <span>Gratis Biaya Instalasi Teknisi</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- CTA Button -->
+          <div class="pt-6 sm:pt-8 mt-auto">
+            <button class="w-full py-3.5 rounded-xl btn-neon-cyan text-xs font-extrabold uppercase tracking-wider flex items-center justify-center gap-2 btn-open-register" data-package="100mbps">
+              <i class="fa-solid fa-file-signature"></i>
+              Daftar Pasang Baru
+            </button>
+          </div>
+
+        </div>
+
+        <!-- PAKET 2: 150 Mbps (Rp 180.000 / Bulan) - FEATURED / PURPLE BORDER MATCHING POSTER -->
+        <div class="relative rounded-2xl sm:rounded-3xl p-5 sm:p-7 glass-card-purple border-2 border-purple-500 flex flex-col justify-between transform md:-translate-y-2 glow-purple">
+          
+          <!-- Top Badge -->
+          <div class="absolute -top-3.5 left-1/2 transform -translate-x-1/2 px-3.5 py-1 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-extrabold text-[10px] sm:text-[11px] tracking-wider uppercase shadow-md flex items-center gap-1.5 whitespace-nowrap">
+            <i class="fa-solid fa-crown text-yellow-300"></i> PALING FAVORIT KELUARGA
+          </div>
+
+          <div>
+            <!-- Header Paket -->
+            <div class="flex items-center justify-between mb-3 mt-1">
+              <span class="px-3 py-1 rounded-full text-xs font-bold bg-purple-950 text-purple-300 border border-purple-400/50">
+                Paling Diminati
+              </span>
+              <div class="w-10 h-10 rounded-full bg-purple-950 flex items-center justify-center text-purple-400 border border-purple-500/40">
+                <i class="fa-solid fa-gauge-high text-base"></i>
+              </div>
+            </div>
+
+            <!-- Speed Display -->
+            <div class="text-3xl sm:text-5xl font-black text-white font-tech tracking-tight">
+              150 <span class="text-xl sm:text-2xl text-purple-400 font-bold">Mbps</span>
+            </div>
+
+            <!-- Price Display Matching Poster -->
+            <div class="mt-3 sm:mt-4 pb-5 border-b border-purple-900/60">
+              <div class="text-2xl sm:text-3xl font-extrabold text-purple-300">
+                Rp 180.000
+                <span class="text-xs font-medium text-slate-400">/ Bulan</span>
+              </div>
+              <div class="text-xs text-yellow-400 font-semibold mt-1">
+                <i class="fa-solid fa-gift mr-1"></i> Bulan ke-1 GRATIS + Free Pasang!
+              </div>
+            </div>
+
+            <!-- Fitur List -->
+            <ul class="mt-5 space-y-2.5 text-xs sm:text-sm text-slate-200">
+              <li class="flex items-center gap-2.5">
+                <i class="fa-solid fa-circle-check text-purple-400 shrink-0"></i>
+                <span>Kecepatan tinggi super responsif</span>
+              </li>
+              <li class="flex items-center gap-2.5">
+                <i class="fa-solid fa-circle-check text-purple-400 shrink-0"></i>
+                <span>Ideal untuk <strong>5 - 8 Perangkat</strong></span>
+              </li>
+              <li class="flex items-center gap-2.5">
+                <i class="fa-solid fa-circle-check text-purple-400 shrink-0"></i>
+                <span>Optimal Streaming 4K &amp; Video Call HD</span>
+              </li>
+              <li class="flex items-center gap-2.5">
+                <i class="fa-solid fa-circle-check text-purple-400 shrink-0"></i>
+                <span>Low Latency Gaming Anti Ngelag</span>
+              </li>
+              <li class="flex items-center gap-2.5">
+                <i class="fa-solid fa-circle-check text-purple-400 shrink-0"></i>
+                <span>Modem Wifi AirPro Dual Band Prioritas</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- CTA Button -->
+          <div class="pt-6 sm:pt-8 mt-auto">
+            <button class="w-full py-3.5 rounded-xl btn-neon-purple text-xs font-extrabold uppercase tracking-wider flex items-center justify-center gap-2 btn-open-register shadow-lg" data-package="150mbps">
+              <i class="fa-solid fa-bolt"></i>
+              Daftar Pasang Baru (Favorit)
+            </button>
+          </div>
+
+        </div>
+
+        <!-- PAKET 3: 200 Mbps (Rp 205.000 / Bulan) - BLUE BORDER MATCHING POSTER -->
+        <div class="relative rounded-2xl sm:rounded-3xl p-5 sm:p-7 glass-card border-2 border-blue-500/60 flex flex-col justify-between hover:border-blue-400 transition-all glow-blue">
+          
+          <div>
+            <!-- Header Paket -->
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-950 text-blue-300 border border-blue-400/40">
+                Ultra High Speed
+              </span>
+              <div class="w-10 h-10 rounded-full bg-blue-950 flex items-center justify-center text-blue-400 border border-blue-500/30">
+                <i class="fa-solid fa-gauge-high text-base"></i>
+              </div>
+            </div>
+
+            <!-- Speed Display -->
+            <div class="text-3xl sm:text-5xl font-black text-white font-tech tracking-tight">
+              200 <span class="text-xl sm:text-2xl text-blue-400 font-bold">Mbps</span>
+            </div>
+
+            <!-- Price Display Matching Poster -->
+            <div class="mt-3 sm:mt-4 pb-5 border-b border-slate-800">
+              <div class="text-2xl sm:text-3xl font-extrabold text-blue-300">
+                Rp 205.000
+                <span class="text-xs font-medium text-slate-400">/ Bulan</span>
+              </div>
+              <div class="text-xs text-yellow-400 font-semibold mt-1">
+                <i class="fa-solid fa-gift mr-1"></i> Bulan ke-1 GRATIS!
+              </div>
+            </div>
+
+            <!-- Fitur List -->
+            <ul class="mt-5 space-y-2.5 text-xs sm:text-sm text-slate-300">
+              <li class="flex items-center gap-2.5">
+                <i class="fa-solid fa-circle-check text-blue-400 shrink-0"></i>
+                <span>Kecepatan maksimal tanpa hambatan</span>
+              </li>
+              <li class="flex items-center gap-2.5">
+                <i class="fa-solid fa-circle-check text-blue-400 shrink-0"></i>
+                <span>Mendukung <strong>10+ Perangkat</strong></span>
+              </li>
+              <li class="flex items-center gap-2.5">
+                <i class="fa-solid fa-circle-check text-blue-400 shrink-0"></i>
+                <span>Upload &amp; Download file besar secepat kilat</span>
+              </li>
+              <li class="flex items-center gap-2.5">
+                <i class="fa-solid fa-circle-check text-blue-400 shrink-0"></i>
+                <span>Sangat cocok untuk Konten Kreator &amp; Bisnis</span>
+              </li>
+              <li class="flex items-center gap-2.5">
+                <i class="fa-solid fa-circle-check text-blue-400 shrink-0"></i>
+                <span>Prioritas CS &amp; Tim Lapangan Responsif</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- CTA Button -->
+          <div class="pt-6 sm:pt-8 mt-auto">
+            <button class="w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-extrabold uppercase tracking-wider flex items-center justify-center gap-2 transition glow-blue btn-open-register" data-package="200mbps">
+              <i class="fa-solid fa-file-signature"></i>
+              Daftar Pasang Baru
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- SECTION 4 KEUNGGULAN (Matching the 4 Icons on Poster Bottom) -->
+    <section id="keunggulan" class="py-12 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="p-6 sm:p-10 rounded-2xl sm:rounded-3xl glass-card border border-cyan-500/20">
+        
+        <div class="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
+          <h2 class="text-xl sm:text-3xl font-extrabold text-white">
+            Mengapa Memilih <span class="text-cyan-400">Ashtatic Internet</span>?
+          </h2>
+          <p class="text-slate-400 text-xs sm:text-sm mt-1.5">
+            Komitmen kami menghadirkan koneksi berkualitas tinggi untuk mendukung seluruh aktivitas digital Anda.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          
+          <!-- Pilar 1: Koneksi Super Cepat -->
+          <div class="p-4 sm:p-5 rounded-2xl bg-slate-900/60 border border-cyan-500/20 text-center space-y-2 sm:space-y-3">
+            <div class="w-12 h-12 mx-auto rounded-xl bg-cyan-950 flex items-center justify-center text-cyan-400 text-xl border border-cyan-400/30">
+              <i class="fa-solid fa-bolt"></i>
+            </div>
+            <h3 class="font-bold text-white text-sm sm:text-base">Koneksi Super Cepat</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Bandwidth simetris tanpa buffering untuk streaming, gaming, belajar daring, dan kerja remote.
+            </p>
+          </div>
+
+          <!-- Pilar 2: Jaringan Stabil -->
+          <div class="p-4 sm:p-5 rounded-2xl bg-slate-900/60 border border-cyan-500/20 text-center space-y-2 sm:space-y-3">
+            <div class="w-12 h-12 mx-auto rounded-xl bg-cyan-950 flex items-center justify-center text-cyan-400 text-xl border border-cyan-400/30">
+              <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h3 class="font-bold text-white text-sm sm:text-base">Jaringan Stabil</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Uptime terjamin 99.9% dengan arsitektur nirkabel modern yang tahan terhadap gangguan fisik putus kabel.
+            </p>
+          </div>
+
+          <!-- Pilar 3: Cocok untuk Rumah & Bisnis -->
+          <div class="p-4 sm:p-5 rounded-2xl bg-slate-900/60 border border-cyan-500/20 text-center space-y-2 sm:space-y-3">
+            <div class="w-12 h-12 mx-auto rounded-xl bg-cyan-950 flex items-center justify-center text-cyan-400 text-xl border border-cyan-400/30">
+              <i class="fa-solid fa-house-laptop"></i>
+            </div>
+            <h3 class="font-bold text-white text-sm sm:text-base">Cocok Rumah &amp; Bisnis</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Solusi fleksibel untuk hunian pribadi, kost, cafe, toko, ruko, kantor cabang, hingga UMKM.
+            </p>
+          </div>
+
+          <!-- Pilar 4: Aktivasi Cepat -->
+          <div class="p-4 sm:p-5 rounded-2xl bg-slate-900/60 border border-cyan-500/20 text-center space-y-2 sm:space-y-3">
+            <div class="w-12 h-12 mx-auto rounded-xl bg-cyan-950 flex items-center justify-center text-cyan-400 text-xl border border-cyan-400/30">
+              <i class="fa-solid fa-bolt-lightning"></i>
+            </div>
+            <h3 class="font-bold text-white text-sm sm:text-base">Aktivasi Cepat</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Setelah pendaftaran terverifikasi, perangkat langsung dikirim dan siap aktif tanpa menunggu proses rumit.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION CHECK JANGKAUAN / COVERAGE -->
+    <section class="py-10 max-w-3xl mx-auto px-4 sm:px-6">
+      <div class="p-5 sm:p-8 rounded-2xl sm:rounded-3xl glass-card border border-cyan-500/30 text-center space-y-3 sm:space-y-4">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-950 text-cyan-400 text-[11px] font-bold uppercase">
+          <i class="fa-solid fa-location-crosshairs"></i> Cek Area Jangkauan
+        </div>
+        <h3 class="text-xl sm:text-2xl font-extrabold text-white">Apakah Wilayah Anda Sudah Tercover?</h3>
+        <p class="text-xs sm:text-sm text-slate-300 max-w-md mx-auto">
+          Ketik nama kecamatan atau kota Anda untuk melihat ketersediaan sinyal Wifi AirPro di sekitar Anda.
+        </p>
+
+        <div class="max-w-md mx-auto flex flex-col xs:flex-row gap-2 pt-1">
+          <input type="text" id="coverageAreaInput" placeholder="Contoh: Lowokwaru, Kebayoran, Sukasari..." class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-cyan-500/30 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-400">
+          <button id="btnCheckCoverage" class="px-5 py-3 rounded-xl btn-neon-cyan text-xs font-bold whitespace-nowrap">
+            Cek Sinyal
+          </button>
+        </div>
+
+        <div id="coverageResult" class="hidden text-left max-w-md mx-auto mt-3"></div>
+      </div>
+    </section>
+
+
+
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- FOOTER -->
+  <!-- ======================================================== -->
+  <footer class="mt-16 sm:mt-20 border-t border-cyan-500/20 bg-[#02050e] py-10 sm:py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+        
+        <!-- Brand Info -->
+        <div class="md:col-span-5 space-y-3 sm:space-y-4">
+          <img src="/images/logo.svg" alt="Ashtatic Internet Solution" class="h-9 sm:h-10 w-auto">
+          <p class="text-xs text-slate-400 leading-relaxed max-w-sm">
+            <strong class="text-cyan-400">Ashtatic Internet Solution</strong> - Koneksi Cepat, Aktivitas Tanpa Batas! 
+            Menghadirkan konektivitas modern berbasis teknologi Wifi AirPro tanpa kabel untuk hunian &amp; bisnis.
+          </p>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="md:col-span-3 space-y-2">
+          <h4 class="text-xs font-bold uppercase text-white tracking-wider">Navigasi Cepat</h4>
+          <ul class="text-xs text-slate-400 space-y-2">
+            <li><a href="#beranda" class="hover:text-cyan-400 transition">Beranda Utama</a></li>
+            <li><a href="#airpro" class="hover:text-cyan-400 transition">Teknologi Wifi AirPro</a></li>
+            <li><a href="#paket" class="hover:text-cyan-400 transition">Pilihan Paket 100/150/200 Mbps</a></li>
+            <li><a href="/tracking" class="hover:text-cyan-400 transition">Lacak Status Pendaftaran</a></li>
+            <li><a href="/admin" class="hover:text-purple-400 transition">Portal Pengelola (Admin)</a></li>
+          </ul>
+        </div>
+
+        <!-- Pilihan Paket -->
+        <div class="md:col-span-4 space-y-2">
+          <h4 class="text-xs font-bold uppercase text-white tracking-wider">Pilihan Paket Internet</h4>
+          <ul class="text-xs text-slate-400 space-y-2">
+            <li>100 Mbps — Rp 105.000 / Bulan (Hemat)</li>
+            <li>150 Mbps — Rp 180.000 / Bulan (Favorit Keluarga)</li>
+            <li>200 Mbps — Rp 205.000 / Bulan (Ultra Speed)</li>
+            <li class="text-yellow-400 font-semibold pt-1">★ Bulan Pertama Gratis + Free Instalasi</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="mt-8 pt-6 border-t border-slate-900 text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div>&copy; 2026 Ashtatic Internet Solution. Seluruh Hak Cipta Dilindungi.</div>
+        <div class="flex items-center gap-3 text-xs">
+          <a href="/tracking" class="text-cyan-400 hover:underline">Tracking Tiket</a>
+          <span>•</span>
+          <a href="/admin" class="text-slate-400 hover:text-white">Panel Admin</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+
+
+  <!-- ======================================================== -->
+  <!-- MODAL FORM DAFTAR PASANG BARU (ULTRA RESPONSIVE & TIDY) -->
+  <!-- ======================================================== -->
+  <div id="registerModal" class="hidden fixed inset-0 z-50 items-center justify-center p-3 sm:p-4 modal-backdrop overflow-y-auto">
+    <div class="relative w-full max-w-xl bg-[#09112a] border border-cyan-400/40 rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-[0_0_50px_rgba(0,240,255,0.3)] my-auto max-h-[92vh] overflow-y-auto">
+      
+      <!-- Close Button -->
+      <button class="btn-close-register absolute top-4 right-4 text-slate-400 hover:text-white text-xl p-1.5 rounded-lg hover:bg-slate-800 transition">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <!-- Modal Title -->
+      <div class="mb-5 pr-8">
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-cyan-950 border border-cyan-400/30 text-cyan-400 text-[10px] sm:text-xs font-bold uppercase mb-1.5">
+          <i class="fa-solid fa-bolt"></i> Registrasi Pasang Baru
+        </div>
+        <h3 class="text-xl sm:text-2xl font-extrabold text-white">Formulir Pendaftaran Ashtatic</h3>
+        <p class="text-xs text-slate-300 mt-0.5">
+          Isi formulir di bawah ini. Tim kami akan segera memverifikasi jaringan dan menjadwalkan instalasi.
+        </p>
+      </div>
+
+      <!-- Form Inputs -->
+      <form id="registrationForm" class="space-y-3.5">
+        
+        <!-- Pilihan Paket -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-cyan-300 mb-1">
+            Pilihan Paket Internet <span class="text-red-400">*</span>
+          </label>
+          <select id="regPackage" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-cyan-500/40 text-white text-sm focus:outline-none focus:border-cyan-400">
+            <option value="100mbps">Paket 100 Mbps — Rp 105.000 / Bulan (Hemat &amp; Terlaris)</option>
+            <option value="150mbps" selected>Paket 150 Mbps — Rp 180.000 / Bulan (Paling Favorit Keluarga)</option>
+            <option value="200mbps">Paket 200 Mbps — Rp 205.000 / Bulan (Ultra High Speed)</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Nama Lengkap -->
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
+              Nama Lengkap <span class="text-red-400">*</span>
+            </label>
+            <input type="text" id="regName" required placeholder="Contoh: Ahmad Fauzi" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-400">
+          </div>
+
+          <!-- Nomor WhatsApp / Telepon -->
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
+              No. WhatsApp / HP <span class="text-red-400">*</span>
+            </label>
+            <div class="relative">
+              <span class="absolute left-3 top-2.5 text-emerald-400 text-sm">
+                <i class="fa-brands fa-whatsapp"></i>
+              </span>
+              <input type="tel" id="regPhone" required placeholder="08xxxxxxxxxx" class="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-400">
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Email -->
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
+              Alamat Email <span class="text-red-400">*</span>
+            </label>
+            <input type="email" id="regEmail" required placeholder="nama@email.com" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-400">
+          </div>
+
+          <!-- Tipe Bangunan / Properti -->
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
+              Tipe Lokasi Pasang
+            </label>
+            <select id="regPropertyType" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm focus:outline-none focus:border-cyan-400">
+              <option value="Rumah Pribadi">Rumah Pribadi</option>
+              <option value="Kontrakan / Kost">Kontrakan / Kost</option>
+              <option value="Ruko / Toko / Usaha">Ruko / Toko / Usaha</option>
+              <option value="Kantor / Instansi">Kantor / Instansi</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Alamat Lengkap -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
+            Alamat Lengkap Pemasangan <span class="text-red-400">*</span>
+          </label>
+          <textarea id="regAddress" required rows="2" placeholder="Nama Jalan, Nomor Rumah, RT/RW, Kelurahan/Desa, Kecamatan, Kota/Kabupaten..." class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-400"></textarea>
+        </div>
+
+        <!-- Titik Koordinat GPS (Opsional) -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-[11px] font-bold uppercase tracking-wider text-slate-300">
+              Titik Koordinat / Link Maps (Opsional)
+            </label>
+            <button type="button" id="btnGetLocation" class="text-xs text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1">
+              <i class="fa-solid fa-location-arrow text-[11px]"></i> Ambil GPS Saya
+            </button>
+          </div>
+          <input type="text" id="regCoords" placeholder="Contoh: -7.98234, 112.63045" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-400">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Jadwal Pasang yang Diinginkan -->
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
+              Rencana Waktu Pasang
+            </label>
+            <select id="regSchedule" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm focus:outline-none focus:border-cyan-400">
+              <option value="Secepatnya (Hari Ini / Besok)">Secepatnya (Hari Ini / Besok)</option>
+              <option value="Akhir Pekan (Sabtu/Minggu)">Akhir Pekan (Sabtu / Minggu)</option>
+              <option value="Pagi Hari (08:00 - 12:00)">Pagi Hari (08:00 - 12:00)</option>
+              <option value="Siang / Sore (13:00 - 17:00)">Siang / Sore (13:00 - 17:00)</option>
+            </select>
+          </div>
+
+          <!-- Catatan Tambahan -->
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
+              Catatan / Patokan
+            </label>
+            <input type="text" id="regNotes" placeholder="Dekat masjid, pagar hitam..." class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-400">
+          </div>
+        </div>
+
+        <!-- Syarat & Ketentuan Info -->
+        <div class="p-3 rounded-xl bg-cyan-950/40 border border-cyan-500/30 text-[11px] sm:text-xs text-cyan-200/90 leading-relaxed">
+          <i class="fa-solid fa-circle-info text-cyan-400 mr-1"></i>
+          <strong>Promo Aktif:</strong> Pemasangan ini berhak atas <strong>Bulan Pertama Gratis</strong> &amp; <strong>Bebas Biaya Instalasi Teknisi</strong>. Modem Wifi AirPro dipinjamkan selama berlangganan.
+        </div>
+
+        <!-- Submit Button -->
+        <div class="pt-1">
+          <button type="submit" class="w-full py-3.5 rounded-xl btn-neon-cyan text-xs sm:text-sm font-extrabold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg">
+            <i class="fa-solid fa-paper-plane text-black"></i>
+            Kirim Pendaftaran Pasang Baru
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL SUKSES PENDAFTARAN -->
+  <!-- ======================================================== -->
+  <div id="successModal" class="hidden fixed inset-0 z-50 items-center justify-center p-3 sm:p-4 modal-backdrop">
+    <div class="relative w-full max-w-md bg-[#070e24] border-2 border-cyan-400 rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-[0_0_60px_rgba(0,240,255,0.4)] text-center space-y-3.5">
+      
+      <!-- Icon Centang -->
+      <div class="w-14 h-14 mx-auto rounded-full bg-cyan-950 border-2 border-cyan-400 flex items-center justify-center text-cyan-400 text-2xl shadow-[0_0_20px_#00f0ff]">
+        <i class="fa-solid fa-check"></i>
+      </div>
+
+      <h3 class="text-xl sm:text-2xl font-black text-white">Pendaftaran Berhasil!</h3>
+      <p class="text-xs text-slate-300">
+        Data registrasi Anda telah tersimpan di sistem Ashtatic dan Firebase.
+      </p>
+
+      <!-- Ticket ID Box -->
+      <div class="p-3.5 rounded-2xl bg-slate-950 border border-cyan-500/40 space-y-1">
+        <div class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">NOMOR TIKET PENDAFTARAN</div>
+        <div id="successTicketId" class="text-2xl font-extrabold text-cyan-400 font-mono tracking-wider">
+          ASH-2611-0000
+        </div>
+        <button id="btnCopyTicket" class="text-xs text-slate-300 hover:text-cyan-300 underline font-semibold mt-0.5 inline-block">
+          <i class="fa-regular fa-copy mr-1"></i> Salin Tiket
+        </button>
+      </div>
+
+      <!-- Detail Singkat -->
+      <div class="text-xs text-slate-300 space-y-1 text-left bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+        <div><strong>Pemohon:</strong> <span id="successName">-</span></div>
+        <div><strong>Paket:</strong> <span id="successPackage">-</span></div>
+        <div><strong>Status:</strong> <span class="text-yellow-400 font-semibold">Menunggu Verifikasi Jaringan</span></div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="space-y-2 pt-2">
+        <a id="btnSuccessTrack" href="/tracking" class="w-full py-3.5 rounded-xl btn-neon-cyan text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg">
+          <i class="fa-solid fa-satellite-dish"></i>
+          Lacak Progress Pendaftaran
+        </a>
+        <button id="btnCloseSuccessModal" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs text-slate-300 hover:text-white transition">
+          Tutup Jendela Ini
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL LIGHTBOX POSTER RESMI -->
+  <!-- ======================================================== -->
+  <div id="posterModal" class="hidden fixed inset-0 z-50 items-center justify-center p-3 sm:p-4 modal-backdrop">
+    <div class="relative max-w-lg max-h-[90vh] bg-slate-950 p-2 sm:p-3 rounded-2xl sm:rounded-3xl border border-cyan-400/50 shadow-2xl flex flex-col items-center">
+      <button id="btnClosePosterModal" class="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-slate-900/80 text-white flex items-center justify-center hover:bg-red-600 transition">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <img src="/images/poster.jpg" alt="Poster Resmi Ashtatic Internet Solution" class="max-h-[82vh] w-auto rounded-xl object-contain">
+    </div>
+  </div>
+
+  <!-- JS Scripts -->
+  <script type="module" src="/js/firebase-config.js"></script>
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>

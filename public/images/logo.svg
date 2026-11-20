@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 90" fill="none">
+  <defs>
+    <linearGradient id="cyanGradFull" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0072ff" />
+      <stop offset="50%" stop-color="#00d2ff" />
+      <stop offset="100%" stop-color="#00f0ff" />
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#e0f7ff" />
+    </linearGradient>
+    <filter id="logoGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Group: Icon -->
+  <g transform="translate(5, 5)">
+    <!-- Ashtatic 'A' symbol -->
+    <path d="M 16 68 L 38 18 C 39 15.5 43 15.5 44 18 L 66 68 C 67 70 65.5 72 63 72 L 53 72 C 51.5 72 50.2 71 49.5 69.5 L 41 48 L 32.5 69.5 C 31.8 71 30.5 72 29 72 L 19 72 C 16.5 72 15 70 16 68 Z" 
+          fill="url(#cyanGradFull)" filter="url(#logoGlow)"/>
+
+    <!-- Left accent bar overlay -->
+    <path d="M 12 64 L 37 16 C 38.5 13 43.5 13 45 16 L 49 25 L 26 69 Z" 
+          fill="#00f0ff" opacity="0.35"/>
+
+    <!-- Dynamic Wifi Waves -->
+    <path d="M 48 22 A 9 9 0 0 1 57 31" fill="none" stroke="#00f0ff" stroke-width="3" stroke-linecap="round" filter="url(#logoGlow)"/>
+    <path d="M 54 15 A 16 16 0 0 1 68 29" fill="none" stroke="#00f0ff" stroke-width="3" stroke-linecap="round" opacity="0.85"/>
+    <path d="M 60 8 A 24 24 0 0 1 79 27" fill="none" stroke="#00d2ff" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
+
+    <circle cx="44.5" cy="25" r="2.2" fill="#ffffff" />
+  </g>
+
+  <!-- Group: Text -->
+  <g transform="translate(95, 0)">
+    <!-- Ashtatic Brand Name -->
+    <text x="0" y="50" font-family="'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif" font-size="42" font-weight="800" fill="url(#textGrad)" letter-spacing="-0.5">
+      Ashtatic
+    </text>
+
+    <!-- Slogan Subtitle -->
+    <text x="2" y="70" font-family="'Orbitron', 'Rajdhani', 'Segoe UI', sans-serif" font-size="11.5" font-weight="700" fill="#00f0ff" letter-spacing="4.5">
+      INTERNET SOLUTION
+    </text>
+  </g>
+</svg>
