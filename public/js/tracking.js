@@ -1,6 +1,7 @@
 // Ashtatic Internet Solution - Tracking Status Script
 import { trackRegistration, saveWifiConfiguration } from "./firebase-config.js";
 import { showToast } from "./toast.js";
+import { ASHTATIC_LOGO_PNG } from "./ashtatic-logo-data.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("trackForm");
@@ -485,33 +486,399 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // Unduh File Kontrak PDF
+    // Unduh File Kontrak PDF - Dibuat langsung dengan jsPDF (100% pasti berisi, tanpa html2canvas)
     const handlePdfDownload = async () => {
-      if (!currentActiveRecord) return;
+      if (!currentActiveRecord) {
+        showToast("Silakan lacak nomor tiket Anda terlebih dahulu.", "warning");
+        return;
+      }
       populateContractData(currentActiveRecord);
-      
-      const element = document.getElementById("contractPdfContent");
-      const ticket = currentActiveRecord.ticketId || "Dokumen";
-      showToast("Sedang menyusun file PDF kontrak resmi...", "info", 2000);
+      const data = currentActiveRecord;
+      const ticket = data.ticketId || "Dokumen";
+      showToast("Sedang menyusun dokumen kontrak...", "info", 3000);
 
-      if (typeof html2pdf !== "undefined" && element) {
-        const opt = {
-          margin:       [8, 8, 8, 8],
-          filename:     `Kontrak-Berlangganan-Ashtatic-${ticket}.pdf`,
-          image:        { type: 'jpeg', quality: 0.98 },
-          html2canvas:  { scale: 2, useCORS: true, logging: false },
-          jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
+      // Tunggu jsPDF tersedia
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      const jsPDFClass = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : window.jsPDF;
+      
+      if (!jsPDFClass) {
+        // Fallback: buka pratinjau modal untuk print
+        const modal = document.getElementById("contractModal");
+        if (modal) { modal.classList.remove("hidden"); modal.classList.add("flex"); }
+        showToast("Gunakan tombol Cetak di pratinjau dokumen.", "info");
+        return;
+      }
+
+      const subId = data.subscriptionId || `ASH-SUB-${(ticket).replace(/[^0-9]/g, '')}`;
+      
+      let dateStr = "";
+      if (data.createdAt) {
         try {
-          await html2pdf().set(opt).from(element).save();
-          showToast("Kontrak Berlangganan PDF berhasil diunduh!", "success");
-        } catch (pdfErr) {
-          console.error("html2pdf error, fallback to print dialog:", pdfErr);
-          window.print();
+          const d = data.createdAt.seconds ? new Date(data.createdAt.seconds * 1000) : new Date(data.createdAt);
+          if (!isNaN(d.getTime())) dateStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        } catch(e) {}
+      }
+      if (!dateStr) dateStr = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
+      const docNumber = `KTR/ASH-2026/${ticket.replace('ASH-', '')}`;
+      const customerName = data.fullName || "-";
+      const phone = data.phone || "-";
+      const address = data.address || "-";
+      const packageStr = `${data.packageName || 'Paket AirPro'} (${data.packageSpeed || 'AirPro'})`;
+      const priceStr = data.packagePrice ? `Rp ${data.packagePrice.toLocaleString('id-ID')} / Bulan (Bulan Pertama Rp 0)` : "Rp 180.000 / Bulan (Bulan Pertama Rp 0)";
+      const ssid = data.wifiSSID || "Ashtatic-AirPro";
+
+      // Buat PDF A4 dengan jsPDF
+      const doc = new jsPDFClass({ orientation: "portrait", unit: "mm", format: "a4" });
+
+      const W = 210; // lebar A4 mm
+      const ML = 15; // margin kiri
+      const MR = 15; // margin kanan
+      const contentW = W - ML - MR; // 180mm
+      let y = 15; // posisi Y awal
+
+      // =====================================================
+      // 1. MUAT LOGO ASHTATIC
+      // =====================================================
+      let logoDataUrl = (typeof ASHTATIC_LOGO_PNG !== "undefined") ? ASHTATIC_LOGO_PNG : null;
+
+      // =====================================================
+      // HEADER / KOP SURAT
+      // =====================================================
+      // Kotak header biru gelap
+      doc.setFillColor(4, 8, 22); // #040816
+      doc.roundedRect(ML, y, contentW, 25, 2.5, 2.5, "F");
+
+      // Wadah Logo Icon di kiri
+      const logoBoxX = ML + 3.5;
+      const logoBoxY = y + 3.5;
+      const logoBoxSize = 18;
+
+      // Render Logo Resmi Ashtatic (PNG Resolusi Tinggi)
+      if (logoDataUrl) {
+        try {
+          doc.addImage(logoDataUrl, "PNG", logoBoxX, logoBoxY, logoBoxSize, logoBoxSize);
+        } catch (imgErr) {
+          console.warn("Gagal render addImage logo:", imgErr);
         }
       } else {
-        window.print();
+        // Fallback wadah & monogram jika logo belum termuat
+        doc.setFillColor(6, 12, 32);
+        doc.setDrawColor(0, 240, 255);
+        doc.setLineWidth(0.4);
+        doc.roundedRect(logoBoxX, logoBoxY, logoBoxSize, logoBoxSize, 2, 2, "FD");
+        doc.setTextColor(0, 240, 255);
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.text("A", logoBoxX + logoBoxSize / 2, logoBoxY + 12.5, { align: "center" });
       }
+
+      // Nama perusahaan & info di samping logo
+      const textX = ML + 25;
+      doc.setTextColor(0, 240, 255); // cyan
+      doc.setFontSize(13);
+      doc.setFont("helvetica", "bold");
+      doc.text("ASHTATIC INTERNET SOLUTION", textX, y + 8);
+
+      doc.setTextColor(96, 165, 250); // biru muda
+      doc.setFontSize(7.5);
+      doc.setFont("helvetica", "normal");
+      doc.text("Koneksi Cepat, Aktivitas Tanpa Batas!  |  Solusi Wifi AirPro Tanpa Kabel", textX, y + 13.5);
+      doc.text("PT Ashtatic Internet Solution  |  Layanan Telekomunikasi Broadband Digital  |  www.ashtatic.net", textX, y + 18.5);
+
+      // Nomor dokumen kanan atas
+      doc.setTextColor(200, 230, 255);
+      doc.setFontSize(7);
+      doc.setFont("helvetica", "bold");
+      doc.text("DOKUMEN RESMI KONTRAK", W - MR - 4, y + 7, { align: "right" });
+      doc.setFont("courier", "bold");
+      doc.setFontSize(8.5);
+      doc.text(docNumber, W - MR - 4, y + 12, { align: "right" });
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7);
+      doc.text(`Tanggal: ${dateStr}`, W - MR - 4, y + 17, { align: "right" });
+
+      y += 30;
+
+      // =====================================================
+      // JUDUL DOKUMEN
+      // =====================================================
+      doc.setTextColor(15, 23, 42); // hampir hitam
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.text("SURAT PERJANJIAN & KONTRAK BERLANGGANAN LAYANAN INTERNET", W / 2, y, { align: "center" });
+      y += 5;
+
+      // Badge jangka waktu
+      doc.setFillColor(224, 242, 254); // biru sangat muda
+      doc.roundedRect(ML + 20, y, contentW - 40, 6, 1.5, 1.5, "F");
+      doc.setTextColor(3, 105, 161);
+      doc.setFontSize(7.5);
+      doc.setFont("helvetica", "bold");
+      doc.text("JANGKA WAKTU KONTRAK BERLANGGANAN RESMI: 24 BULAN (2 TAHUN)", W / 2, y + 4, { align: "center" });
+      y += 10;
+
+      // =====================================================
+      // PARAGRAF PEMBUKA
+      // =====================================================
+      doc.setTextColor(51, 65, 85);
+      doc.setFontSize(8.5);
+      doc.setFont("helvetica", "normal");
+      const paraText = `Pada hari ini, telah disepakati perjanjian berlangganan layanan telekomunikasi internet Wifi AirPro antara PT ASHTATIC INTERNET SOLUTION dan Pelanggan yang tercantum dalam rincian data di bawah ini:`;
+      const paraLines = doc.splitTextToSize(paraText, contentW);
+      doc.text(paraLines, ML, y);
+      y += paraLines.length * 4 + 3;
+
+      // =====================================================
+      // TABEL I: DATA IDENTITAS PELANGGAN
+      // =====================================================
+      // Header tabel
+      doc.setFillColor(15, 23, 42); // #0f172a
+      doc.rect(ML, y, contentW, 6, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "bold");
+      doc.text("I. DATA IDENTITAS PELANGGAN & PARAMETER LAYANAN", ML + 3, y + 4);
+      doc.setTextColor(52, 211, 153); // hijau
+      doc.text("● STATUS: TERVERIFIKASI & AKTIF", W - MR - 3, y + 4, { align: "right" });
+      y += 6;
+
+      // Baris tabel
+      const rows = [
+        ["ID Langganan Resmi", subId, "Nomor Tiket", ticket],
+        ["Nama Lengkap", customerName, "No. WhatsApp", phone],
+        ["Paket & Kecepatan", packageStr, "Biaya Bulanan", priceStr],
+        ["Nama WiFi (SSID)", ssid, "Perangkat Terpasang", "1 Unit Modem Wifi AirPro"],
+        ["Alamat Pemasangan", address, "", ""],
+      ];
+
+      const colW1 = 38, colW2 = 52, colW3 = 36, colW4 = contentW - colW1 - colW2 - colW3;
+
+      rows.forEach((row, i) => {
+        const rowH = 6.5;
+        const isEven = i % 2 === 0;
+        
+        // Background baris berselang
+        doc.setFillColor(248, 250, 252);
+        doc.rect(ML, y, colW1, rowH, "F");
+        if (row[2]) {
+          doc.setFillColor(248, 250, 252);
+          doc.rect(ML + colW1 + colW2, y, colW3, rowH, "F");
+        }
+        // Baris data putih
+        doc.setFillColor(255, 255, 255);
+        doc.rect(ML + colW1, y, colW2, rowH, "F");
+        if (row[2]) {
+          doc.rect(ML + colW1 + colW2 + colW3, y, colW4, rowH, "F");
+        } else {
+          // Kolom alamat full width
+          doc.rect(ML + colW1, y, colW2 + colW3 + colW4, rowH, "F");
+        }
+
+        // Garis border
+        doc.setDrawColor(226, 232, 240);
+        doc.setLineWidth(0.3);
+        doc.rect(ML, y, contentW, rowH);
+        doc.line(ML + colW1, y, ML + colW1, y + rowH);
+        if (row[2]) {
+          doc.line(ML + colW1 + colW2, y, ML + colW1 + colW2, y + rowH);
+          doc.line(ML + colW1 + colW2 + colW3, y, ML + colW1 + colW2 + colW3, y + rowH);
+        }
+
+        // Label kolom kiri
+        doc.setTextColor(71, 85, 105);
+        doc.setFontSize(7.5);
+        doc.setFont("helvetica", "bold");
+        doc.text(row[0], ML + 2, y + 4.3);
+
+        // Nilai kolom data kiri
+        doc.setTextColor(15, 23, 42);
+        doc.setFont("helvetica", "normal");
+        const val1Lines = doc.splitTextToSize(row[1], colW2 - 4);
+        doc.text(val1Lines[0] || "", ML + colW1 + 2, y + 4.3);
+
+        if (row[2]) {
+          // Label & nilai kolom kanan
+          doc.setTextColor(71, 85, 105);
+          doc.setFont("helvetica", "bold");
+          doc.text(row[2], ML + colW1 + colW2 + 2, y + 4.3);
+          doc.setTextColor(15, 23, 42);
+          doc.setFont("helvetica", "normal");
+          const val2Lines = doc.splitTextToSize(row[3], colW4 - 2);
+          doc.text(val2Lines[0] || "", ML + colW1 + colW2 + colW3 + 2, y + 4.3);
+        }
+
+        y += rowH;
+      });
+
+      y += 6;
+
+      // =====================================================
+      // TABEL II: KETENTUAN DAN PASAL PERJANJIAN
+      // =====================================================
+      doc.setFillColor(15, 23, 42);
+      doc.rect(ML, y, contentW, 6, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "bold");
+      doc.text("II. KETENTUAN DAN PASAL PERJANJIAN", ML + 3, y + 4);
+      y += 8;
+
+      doc.setTextColor(51, 65, 85);
+      doc.setFontSize(8);
+
+      const pasal1 = `Pasal 1 - Jangka Waktu Kontrak: Pelanggan mengikatkan diri dalam kontrak berlangganan layanan internet Wifi AirPro selama masa kontrak minimal 24 (dua puluh empat) bulan berturut-turut terhitung sejak tanggal aktivasi layanan dinyatakan selesai dan online.`;
+      const pasal2 = `Pasal 2 - Skema Biaya & Pembayaran: Pelanggan berhak atas promo Bebas Biaya Instalasi dan Gratis Berlangganan Bulan Pertama (Rp 0). Tagihan bulanan reguler mulai berlaku pada bulan kedua dan wajib dibayarkan sebelum tanggal 20 setiap bulannya.`;
+      const pasal4 = `Pasal 4 - Jaminan Kualitas Layanan: Ashtatic Internet Solution menjamin kestabilan koneksi sinyal Wifi AirPro dan memberikan perbaikan teknisi gratis selama masa kontrak aktif.`;
+      const pasal5 = `Pasal 5 - Ketentuan Hukum & Keabsahan: Perjanjian ini dibuat dan diterbitkan secara sah melalui sistem digital PT Ashtatic Internet Solution dan memiliki kekuatan hukum yang sah dan mengikat antara penyedia layanan dan Pelanggan sesuai UU Nomor 11 Tahun 2008 tentang Informasi dan Transaksi Elektronik (UU ITE) Republik Indonesia.`;
+
+      [pasal1, pasal2].forEach(p => {
+        const lines = doc.splitTextToSize(p, contentW);
+        const fst = lines[0];
+        const rest = lines.slice(1);
+        // Bold teks pasal di awal
+        doc.setFont("helvetica", "bold");
+        doc.text(fst, ML, y);
+        doc.setFont("helvetica", "normal");
+        if (rest.length) doc.text(rest, ML, y + 4);
+        y += lines.length * 4 + 2;
+      });
+
+      y += 1;
+
+      // =====================================================
+      // KOTAK MERAH PASAL 3 - PENALTI Rp 1.500.000,-
+      // =====================================================
+      const pasal3Judul = "Pasal 3 - Klausul Pengakhiran Dini & Biaya Penalti Rp 1.500.000,- (PENTING):";
+      const pasal3Isi = `Apabila Pelanggan memutuskan, membatalkan, menonaktifkan, atau berhenti berlangganan sebelum jangka waktu kontrak 2 (dua) tahun (24 bulan) berakhir dengan alasan apa pun, maka Pelanggan DIWAJIBKAN MEMBAYAR BIAYA PENALTI PENGAKHIRAN DINI (EARLY TERMINATION FEE) SEBESAR RP 1.500.000,- (SATU JUTA LIMA RATUS RIBU RUPIAH) secara penuh dan seketika kepada PT Ashtatic Internet Solution, serta wajib mengembalikan seluruh unit perangkat Modem Wifi AirPro beserta kelengkapannya dalam kondisi baik dan berfungsi normal.`;
+
+      const judulLines = doc.splitTextToSize(pasal3Judul, contentW - 6);
+      const isiLines = doc.splitTextToSize(pasal3Isi, contentW - 6);
+      const boxH = (judulLines.length + isiLines.length) * 4 + 7;
+
+      doc.setFillColor(254, 242, 242); // merah sangat muda
+      doc.setDrawColor(239, 68, 68);   // merah
+      doc.setLineWidth(0.5);
+      doc.roundedRect(ML, y, contentW, boxH, 1.5, 1.5, "FD");
+
+      doc.setTextColor(153, 27, 27); // merah gelap
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7.5);
+      doc.text("⚠ " + pasal3Judul, ML + 3, y + 5);
+      
+      doc.setTextColor(69, 10, 10); // merah sangat gelap
+      doc.setFont("helvetica", "normal");
+      const p3Start = y + 5 + judulLines.length * 4;
+      doc.text(isiLines, ML + 3, p3Start);
+
+      y += boxH + 4;
+
+      // Pasal 4 & 5
+      [pasal4, pasal5].forEach(p => {
+        const lines = doc.splitTextToSize(p, contentW);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(51, 65, 85);
+        doc.text(lines[0], ML, y);
+        doc.setFont("helvetica", "normal");
+        if (lines.length > 1) doc.text(lines.slice(1), ML, y + 4);
+        y += lines.length * 4 + 2;
+      });
+
+      y += 5;
+
+      // =====================================================
+      // GARIS PEMISAH TANDA TANGAN
+      // =====================================================
+      doc.setDrawColor(203, 213, 225);
+      doc.setLineWidth(0.5);
+      doc.line(ML, y, ML + contentW, y);
+      y += 8;
+
+      // =====================================================
+      // KOLOM TANDA TANGAN (2 KOLOM) - TANPA SEBUTAN PIHAK PERTAMA / KEDUA / LABEL
+      // =====================================================
+      const colMid = ML + contentW / 2;
+      const signW = contentW / 2 - 5;
+      const leftCX = ML + signW / 2;
+      const rightCX = colMid + 5 + signW / 2;
+
+      // Langsung nama perusahaan di kiri & nama pelanggan di kanan
+      doc.setTextColor(15, 23, 42);
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "bold");
+      doc.text("PT ASHTATIC INTERNET SOLUTION", leftCX, y, { align: "center" });
+      doc.text(customerName, rightCX, y, { align: "center" });
+      y += 5;
+
+      // Stempel bulat kiri (Ashtatic)
+      const stampCX = leftCX;
+      const stampCY = y + 13;
+      const stampR = 12;
+      doc.setDrawColor(2, 132, 199); // biru
+      doc.setLineWidth(0.8);
+      doc.circle(stampCX, stampCY, stampR, "D");
+      doc.setDrawColor(2, 132, 199);
+      doc.setLineWidth(0.3);
+      doc.circle(stampCX, stampCY, stampR - 1.8, "D");
+      doc.setTextColor(2, 132, 199);
+      doc.setFontSize(5.5);
+      doc.setFont("helvetica", "bold");
+      doc.text("ASHTATIC", stampCX, stampCY - 3.5, { align: "center" });
+      doc.setFontSize(7);
+      doc.text("VERIFIED", stampCX, stampCY + 0.5, { align: "center" });
+      doc.setFontSize(5);
+      doc.text("RESMI 2026", stampCX, stampCY + 4, { align: "center" });
+      doc.setDrawColor(2, 132, 199);
+      doc.setLineWidth(0.3);
+      doc.line(stampCX - 7, stampCY - 1.2, stampCX + 7, stampCY - 1.2);
+      doc.line(stampCX - 7, stampCY + 1.8, stampCX + 7, stampCY + 1.8);
+
+      // Tanda tangan kanan (pelanggan)
+      const signRCX = rightCX;
+      const signRCY = y + 13;
+      doc.setTextColor(5, 150, 105); // hijau
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "bold");
+      doc.text("[TERVERIFIKASI & AKTIF]", signRCX, signRCY, { align: "center" });
+      doc.setDrawColor(5, 150, 105);
+      doc.setLineWidth(0.4);
+      doc.roundedRect(signRCX - 25, signRCY - 6.5, 50, 10, 1.5, 1.5, "D");
+
+      y += 28;
+
+      // Nama di bawah tanda tangan
+      doc.setTextColor(15, 23, 42);
+      doc.setFontSize(8.5);
+      doc.setFont("helvetica", "bold");
+      doc.text("Direktur Layanan Jaringan", stampCX, y, { align: "center" });
+      const customerLines = doc.splitTextToSize(customerName, signW);
+      doc.text(customerLines[0], signRCX, y, { align: "center" });
+      y += 4;
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(100, 116, 139);
+      doc.setFontSize(7.5);
+      doc.text("PT Ashtatic Internet Solution", stampCX, y, { align: "center" });
+      doc.text("Pelanggan Wifi AirPro", signRCX, y, { align: "center" });
+
+      y += 10;
+
+      // =====================================================
+      // FOOTER DOKUMEN
+      // =====================================================
+      doc.setDrawColor(226, 232, 240);
+      doc.setLineWidth(0.3);
+      doc.line(ML, y, ML + contentW, y);
+      y += 4;
+      doc.setTextColor(100, 116, 139);
+      doc.setFontSize(6.5);
+      doc.setFont("helvetica", "normal");
+      doc.text("Dokumen kontrak resmi diterbitkan secara otomatis oleh sistem digital PT Ashtatic Internet Solution.", ML, y);
+      doc.text("Halaman 1 dari 1", ML + contentW, y, { align: "right" });
+
+      // Simpan PDF
+      doc.save(`Kontrak-Berlangganan-Ashtatic-${ticket}.pdf`);
+      showToast("Dokumen Kontrak Berlangganan PDF berhasil diunduh!", "success");
     };
 
     if (btnDownload) {
@@ -539,7 +906,20 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     setTxt("pdfDocNumber", `KTR/ASH-2026/${(data.ticketId || '').replace('ASH-', '')}`);
-    setTxt("pdfPrintDate", `Tanggal: ${data.createdAtReadable || new Date().toLocaleDateString('id-ID')}`);
+    
+    let dateStr = "";
+    if (data.createdAt) {
+      try {
+        const d = (data.createdAt.seconds) ? new Date(data.createdAt.seconds * 1000) : new Date(data.createdAt);
+        if (!isNaN(d.getTime())) {
+          dateStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+      } catch (e) {}
+    }
+    if (!dateStr) {
+      dateStr = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    }
+    setTxt("pdfPrintDate", `Tanggal: ${dateStr}`);
     setTxt("pdfSubId", subId);
     setTxt("pdfTicketId", data.ticketId);
     setTxt("pdfName", data.fullName);

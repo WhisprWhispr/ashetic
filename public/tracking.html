@@ -10,6 +10,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body class="bg-[#040816] text-slate-100 min-h-screen cyber-grid flex flex-col justify-between selection:bg-cyan-500 selection:text-black">
@@ -358,196 +359,166 @@
       </div>
 
       <!-- Scrollable Paper Container -->
-      <div class="p-3 sm:p-6 overflow-y-auto flex-grow bg-slate-950/70 flex justify-center">
+      <div id="contractScrollContainer" class="p-3 sm:p-6 overflow-auto flex-grow bg-slate-950/70 flex justify-center">
         
-        <!-- A4 Printable Document Paper -->
-        <div id="contractPdfContent" class="w-full max-w-[760px] bg-white text-slate-900 p-6 sm:p-10 shadow-2xl rounded-lg text-xs leading-relaxed space-y-4 font-sans border border-slate-200">
+        <!-- A4 Printable Document Paper (Standard 794px A4 Width, Executive Professional Layout) -->
+        <div id="contractPdfContent" style="width: 794px !important; min-width: 794px !important; background: #ffffff !important; color: #0f172a !important; font-family: 'Segoe UI', Arial, Helvetica, sans-serif !important; padding: 26px 36px !important; box-sizing: border-box !important; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); line-height: 1.38; font-size: 10px; display: flex; flex-direction: column; justify-content: space-between;">
           
-          <!-- KOP SURAT ASHTATIC -->
-          <div class="flex items-start justify-between border-b-2 border-slate-900 pb-3 gap-4">
-            <div class="space-y-1">
-              <div class="flex items-center gap-2">
-                <div class="w-9 h-9 rounded-lg bg-[#040816] flex items-center justify-center text-cyan-400 font-black text-xl border border-cyan-400">
-                  A
-                </div>
-                <div>
-                  <h1 class="text-base sm:text-lg font-black tracking-tight text-slate-900 uppercase">ASHTATIC INTERNET SOLUTION</h1>
-                  <p class="text-[10px] text-cyan-700 font-bold uppercase tracking-wider">Koneksi Cepat, Aktivitas Tanpa Batas!</p>
-                </div>
+          <!-- KOP SURAT ASHTATIC RESMI -->
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2.5px solid #0f172a; padding-bottom: 10px; margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <!-- Logo Icon Box -->
+              <img src="/images/ashtatic-logo.png" alt="Logo Ashtatic Internet Solution" style="width: 48px; height: 48px; border-radius: 10px; border: 1.5px solid #00f0ff; object-fit: contain; flex-shrink: 0; background: #040816;">
+              <div>
+                <h1 style="font-size: 16px; font-weight: 900; letter-spacing: -0.2px; color: #040816; margin: 0; text-transform: uppercase;">ASHTATIC INTERNET SOLUTION</h1>
+                <div style="font-size: 10px; font-weight: 800; color: #0284c7; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 1px;">Koneksi Cepat, Aktivitas Tanpa Batas! • Solusi Wifi AirPro Tanpa Kabel</div>
+                <div style="font-size: 9px; color: #475569; margin-top: 2px;">PT Ashtatic Internet Solution • Layanan Telekomunikasi Broadband Digital • www.ashtatic.net</div>
               </div>
-              <p class="text-[10px] text-slate-600 leading-tight pt-1">
-                Layanan Telekomunikasi &amp; Internet Broadband Modern Berbasis Teknologi Wifi AirPro Tanpa Kabel.<br>
-                Portal Resmi: <span class="text-blue-700 underline font-medium">https://ashtatic.net</span> • Customer Service &amp; Support 24/7
-              </p>
             </div>
-            <div class="text-right text-[10px] text-slate-600 shrink-0">
-              <div class="font-bold text-slate-900">DOKUMEN RESMI</div>
-              <div class="font-mono text-cyan-800 font-bold" id="pdfDocNumber">KTR/ASH-2026/0000</div>
-              <div id="pdfPrintDate">Tanggal: -</div>
+            <div style="text-align: right; font-size: 9.5px; color: #475569; flex-shrink: 0;">
+              <div style="display: inline-block; background: #0f172a; color: #ffffff; font-weight: 800; font-size: 8.5px; padding: 2px 8px; border-radius: 4px; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 2px;">DOKUMEN RESMI KONTRAK</div>
+              <div style="font-family: monospace; font-weight: 900; color: #0369a1; font-size: 11px;" id="pdfDocNumber">KTR/ASH-2026/0000</div>
+              <div id="pdfPrintDate" style="color: #64748b; font-size: 9px; margin-top: 1px;">Tanggal: -</div>
             </div>
           </div>
 
-          <!-- JUDUL PERJANJIAN -->
-          <div class="text-center pt-1 pb-1 space-y-0.5">
-            <h2 class="text-sm sm:text-base font-black text-slate-900 uppercase tracking-wide">
-              SURAT PERJANJIAN &amp; KONTRAK BERLANGGANAN
+          <!-- JUDUL PERJANJIAN & BADGE -->
+          <div style="text-align: center; margin-bottom: 8px;">
+            <h2 style="font-size: 13px; font-weight: 900; color: #0f172a; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 3px 0;">
+              SURAT PERJANJIAN &amp; KONTRAK BERLANGGANAN LAYANAN INTERNET
             </h2>
-            <div class="inline-block px-3 py-0.5 rounded-full bg-cyan-100 text-cyan-900 font-bold text-[10px] uppercase tracking-wider">
-              JANGKA WAKTU BERLANGGANAN RESMI: 24 BULAN (2 TAHUN)
+            <div style="display: inline-block; padding: 2px 12px; background: #e0f2fe; color: #0369a1; font-weight: 800; font-size: 9px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #bae6fd;">
+              JANGKA WAKTU KONTRAK BERLANGGANAN RESMI: 24 BULAN (2 TAHUN)
             </div>
           </div>
 
-          <p class="text-[11px] text-slate-700 text-justify">
-            Pada hari ini, telah disepakati perjanjian berlangganan layanan telekomunikasi internet antara <strong>ASHTATIC INTERNET SOLUTION</strong> (disebut sebagai <strong>PIHAK PERTAMA</strong>) dan Pelanggan yang tercantum di bawah ini (disebut sebagai <strong>PIHAK KEDUA</strong>):
+          <p style="font-size: 9.5px; color: #334155; text-align: justify; margin: 0 0 7px 0; line-height: 1.38;">
+            Pada hari ini, telah disepakati perjanjian berlangganan layanan telekomunikasi internet Wifi AirPro antara <strong>PT ASHTATIC INTERNET SOLUTION</strong> dan <strong>Pelanggan</strong> yang tercantum dalam rincian data di bawah ini:
           </p>
 
-          <!-- TABEL IDENTITAS PELANGGAN & LAYANAN -->
-          <div class="rounded-lg border border-slate-300 overflow-hidden text-[11px]">
-            <div class="bg-slate-100 px-3 py-1.5 font-bold text-slate-900 border-b border-slate-300 flex items-center justify-between">
+          <!-- TABEL IDENTITAS PELANGGAN & PARAMETER LAYANAN -->
+          <div style="border: 1.5px solid #cbd5e1; border-radius: 6px; overflow: hidden; margin-bottom: 8px;">
+            <div style="background: #0f172a; padding: 4px 10px; font-weight: 800; font-size: 9.5px; color: #ffffff; display: flex; justify-content: space-between; align-items: center;">
               <span>I. DATA IDENTITAS PELANGGAN &amp; PARAMETER LAYANAN</span>
-              <span class="text-[10px] font-mono text-emerald-700">STATUS: AKTIF</span>
+              <span style="font-family: monospace; color: #34d399; font-size: 9px; font-weight: 800;">● STATUS: TERVERIFIKASI &amp; AKTIF</span>
             </div>
-            <table class="w-full text-left divide-y divide-slate-200">
+            <table style="width: 100%; border-collapse: collapse; font-size: 9.5px;">
               <tbody>
-                <tr class="divide-x divide-slate-200">
-                  <td class="px-3 py-1.5 font-semibold text-slate-600 w-1/3 bg-slate-50">ID Langganan Resmi</td>
-                  <td class="px-3 py-1.5 font-mono font-bold text-emerald-700" id="pdfSubId">-</td>
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                  <td style="width: 25%; padding: 3.5px 8px; font-weight: 700; color: #475569; background: #f8fafc; border-right: 1px solid #e2e8f0;">ID Langganan Resmi</td>
+                  <td style="width: 25%; padding: 3.5px 8px; font-family: monospace; font-weight: 800; color: #047857; border-right: 1px solid #e2e8f0;" id="pdfSubId">-</td>
+                  <td style="width: 20%; padding: 3.5px 8px; font-weight: 700; color: #475569; background: #f8fafc; border-right: 1px solid #e2e8f0;">Nomor Tiket</td>
+                  <td style="width: 30%; padding: 3.5px 8px; font-family: monospace; font-weight: 800; color: #0f172a;" id="pdfTicketId">-</td>
                 </tr>
-                <tr class="divide-x divide-slate-200">
-                  <td class="px-3 py-1.5 font-semibold text-slate-600 bg-slate-50">Nomor Tiket Registrasi</td>
-                  <td class="px-3 py-1.5 font-mono font-bold text-slate-900" id="pdfTicketId">-</td>
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                  <td style="padding: 3.5px 8px; font-weight: 700; color: #475569; background: #f8fafc; border-right: 1px solid #e2e8f0;">Nama Lengkap</td>
+                  <td style="padding: 3.5px 8px; font-weight: 800; color: #0f172a; border-right: 1px solid #e2e8f0;" id="pdfName">-</td>
+                  <td style="padding: 3.5px 8px; font-weight: 700; color: #475569; background: #f8fafc; border-right: 1px solid #e2e8f0;">No. WhatsApp</td>
+                  <td style="padding: 3.5px 8px; color: #0f172a;" id="pdfPhone">-</td>
                 </tr>
-                <tr class="divide-x divide-slate-200">
-                  <td class="px-3 py-1.5 font-semibold text-slate-600 bg-slate-50">Nama Lengkap Pelanggan</td>
-                  <td class="px-3 py-1.5 font-bold text-slate-900" id="pdfName">-</td>
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                  <td style="padding: 3.5px 8px; font-weight: 700; color: #475569; background: #f8fafc; border-right: 1px solid #e2e8f0;">Paket &amp; Kecepatan</td>
+                  <td style="padding: 3.5px 8px; font-weight: 800; color: #0284c7; border-right: 1px solid #e2e8f0;" id="pdfPackage">-</td>
+                  <td style="padding: 3.5px 8px; font-weight: 700; color: #475569; background: #f8fafc; border-right: 1px solid #e2e8f0;">Biaya Bulanan</td>
+                  <td style="padding: 3.5px 8px; font-weight: 800; color: #0f172a;" id="pdfPrice">-</td>
                 </tr>
-                <tr class="divide-x divide-slate-200">
-                  <td class="px-3 py-1.5 font-semibold text-slate-600 bg-slate-50">Kontak WhatsApp / HP</td>
-                  <td class="px-3 py-1.5" id="pdfPhone">-</td>
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                  <td style="padding: 3.5px 8px; font-weight: 700; color: #475569; background: #f8fafc; border-right: 1px solid #e2e8f0;">Nama WiFi (SSID)</td>
+                  <td style="padding: 3.5px 8px; font-family: monospace; font-weight: 700; color: #0369a1; border-right: 1px solid #e2e8f0;" id="pdfSSID">-</td>
+                  <td style="padding: 3.5px 8px; font-weight: 700; color: #475569; background: #f8fafc; border-right: 1px solid #e2e8f0;">Perangkat Terpasang</td>
+                  <td style="padding: 3.5px 8px; color: #334155;">1 Unit Modem Wifi AirPro</td>
                 </tr>
-                <tr class="divide-x divide-slate-200">
-                  <td class="px-3 py-1.5 font-semibold text-slate-600 bg-slate-50">Email Pelanggan</td>
-                  <td class="px-3 py-1.5" id="pdfEmail">-</td>
-                </tr>
-                <tr class="divide-x divide-slate-200">
-                  <td class="px-3 py-1.5 font-semibold text-slate-600 bg-slate-50">Alamat Pemasangan</td>
-                  <td class="px-3 py-1.5 leading-snug" id="pdfAddress">-</td>
-                </tr>
-                <tr class="divide-x divide-slate-200">
-                  <td class="px-3 py-1.5 font-semibold text-slate-600 bg-slate-50">Paket Internet &amp; Kecepatan</td>
-                  <td class="px-3 py-1.5 font-bold text-cyan-800" id="pdfPackage">-</td>
-                </tr>
-                <tr class="divide-x divide-slate-200">
-                  <td class="px-3 py-1.5 font-semibold text-slate-600 bg-slate-50">Biaya Tagihan Bulanan</td>
-                  <td class="px-3 py-1.5 font-semibold text-slate-900" id="pdfPrice">- (Bulan Pertama Rp 0)</td>
-                </tr>
-                <tr class="divide-x divide-slate-200">
-                  <td class="px-3 py-1.5 font-semibold text-slate-600 bg-slate-50">Nama WiFi (SSID)</td>
-                  <td class="px-3 py-1.5 font-mono font-bold text-slate-800" id="pdfSSID">-</td>
-                </tr>
-                <tr class="divide-x divide-slate-200">
-                  <td class="px-3 py-1.5 font-semibold text-slate-600 bg-slate-50">Perangkat Terpasang</td>
-                  <td class="px-3 py-1.5">1 (Satu) Unit Modem Wifi AirPro Tanpa Kabel + Adaptor Power</td>
+                <tr>
+                  <td style="padding: 3.5px 8px; font-weight: 700; color: #475569; background: #f8fafc; border-right: 1px solid #e2e8f0;">Alamat Pemasangan</td>
+                  <td colspan="3" style="padding: 3.5px 8px; color: #1e293b; line-height: 1.3;" id="pdfAddress">-</td>
                 </tr>
               </tbody>
             </table>
           </div>
 
           <!-- PASAL-PASAL KONTRAK -->
-          <div class="space-y-2 pt-1 text-[11px] text-slate-800 text-justify">
-            <div class="font-bold text-slate-900 text-xs">II. KETENTUAN DAN PASAL PERJANJIAN</div>
+          <div style="margin-bottom: 6px; font-size: 9.5px; color: #334155; text-align: justify; line-height: 1.36;">
+            <div style="font-weight: 800; color: #0f172a; font-size: 10px; margin-bottom: 3px;">II. KETENTUAN DAN PASAL PERJANJIAN</div>
 
-            <div class="space-y-1">
-              <strong class="text-slate-900">Pasal 1 — Jangka Waktu Berlangganan (2 Tahun):</strong>
-              <p class="text-slate-700">
-                PIHAK KEDUA mengikatkan diri dalam kontrak berlangganan layanan internet Wifi AirPro selama masa kontrak minimal <strong>24 (dua puluh empat) bulan berturut-turut</strong> terhitung sejak tanggal aktivasi layanan selesai dilakukan.
-              </p>
+            <div style="margin-bottom: 2px;">
+              <strong style="color: #0f172a;">Pasal 1 — Jangka Waktu Kontrak Berlangganan:</strong>
+              Pelanggan mengikatkan diri dalam kontrak berlangganan layanan internet Wifi AirPro selama masa kontrak minimal <strong>24 (dua puluh empat) bulan berturut-turut</strong> terhitung sejak tanggal aktivasi layanan dinyatakan selesai dan online.
             </div>
 
-            <div class="space-y-1">
-              <strong class="text-slate-900">Pasal 2 — Skema Biaya &amp; Pembayaran:</strong>
-              <p class="text-slate-700">
-                PIHAK KEDUA berhak atas fasilitas promosi <strong>Bebas Biaya Instalasi</strong> dan <strong>Bebas Biaya Berlangganan di Bulan Pertama</strong>. Tagihan bulanan reguler mulai berlaku pada bulan kedua dan wajib diselesaikan setiap bulannya sebelum tanggal jatuh tempo (tanggal 20).
-              </p>
+            <div style="margin-bottom: 2px;">
+              <strong style="color: #0f172a;">Pasal 2 — Skema Biaya &amp; Pembayaran:</strong>
+              Pelanggan berhak atas promo <strong>Bebas Biaya Instalasi</strong> dan <strong>Gratis Berlangganan Bulan Pertama (Rp 0)</strong>. Tagihan bulanan reguler mulai berlaku pada bulan kedua dan wajib dibayarkan sebelum tanggal 20 setiap bulannya.
             </div>
 
             <!-- PASAL KHUSUS PENALTI PEMUTUSAN SEBELUM 2 TAHUN (RP 1.500.000) -->
-            <div class="p-2.5 rounded-lg bg-red-50 border border-red-300 space-y-1">
-              <strong class="text-red-900 flex items-center gap-1.5">
-                <i class="fa-solid fa-triangle-exclamation text-red-600"></i>
-                Pasal 3 — Pengakhiran Dini &amp; Biaya Penalti Rp 1.500.000,- (PENTING):
+            <div style="background: #fef2f2; border: 1.5px solid #ef4444; border-radius: 5px; padding: 5px 8px; margin: 4px 0;">
+              <strong style="color: #991b1b; font-size: 9.5px; display: block; margin-bottom: 1px;">
+                ⚠️ Pasal 3 — Klausul Pengakhiran Dini &amp; Biaya Penalti Rp 1.500.000,- (PENTING):
               </strong>
-              <p class="text-red-950 font-medium leading-relaxed">
-                Apabila PIHAK KEDUA (Pelanggan) memutuskan, membatalkan, menonaktifkan, atau berhenti berlangganan sebelum jangka waktu kontrak <strong>2 (dua) tahun (24 bulan)</strong> berakhir dengan alasan apa pun, maka Pelanggan <strong>DIWAJIBKAN MEMBAYAR BIAYA PENALTI PENGAKHIRAN DINI (EARLY TERMINATION FEE) SEBESAR RP 1.500.000,- (SATU JUTA LIMA RATUS RIBU RUPIAH)</strong> secara penuh dan seketika kepada PIHAK PERTAMA, serta wajib mengembalikan seluruh unit perangkat Modem Wifi AirPro beserta kelengkapannya dalam kondisi baik dan berfungsi normal.
-              </p>
+              <div style="color: #450a0a; font-weight: 600; line-height: 1.35;">
+                Apabila Pelanggan memutuskan, membatalkan, menonaktifkan, atau berhenti berlangganan sebelum jangka waktu kontrak <strong>2 (dua) tahun (24 bulan)</strong> berakhir dengan alasan apa pun, maka Pelanggan <strong>DIWAJIBKAN MEMBAYAR BIAYA PENALTI PENGAKHIRAN DINI (EARLY TERMINATION FEE) SEBESAR RP 1.500.000,- (SATU JUTA LIMA RATUS RIBU RUPIAH)</strong> secara penuh dan seketika kepada PT Ashtatic Internet Solution, serta wajib mengembalikan seluruh unit perangkat Modem Wifi AirPro beserta kelengkapannya dalam kondisi baik dan berfungsi normal.
+              </div>
             </div>
 
-            <div class="space-y-1">
-              <strong class="text-slate-900">Pasal 4 — Hak dan Kewajiban Pihak Pertama (Ashtatic):</strong>
-              <p class="text-slate-700">
-                PIHAK PERTAMA berkewajiban menjaga kestabilan sinyal nirkabel Wifi AirPro dan memberikan jaminan servis teknisi secara gratis selama masa kontrak aktif, kecuali kerusakan akibat kelalaian pemakaian oleh PIHAK KEDUA.
-              </p>
+            <div style="margin-bottom: 2px;">
+              <strong style="color: #0f172a;">Pasal 4 — Jaminan Kualitas Layanan:</strong>
+              Ashtatic Internet Solution menjamin kestabilan koneksi sinyal Wifi AirPro dan memberikan perbaikan teknisi gratis selama masa kontrak aktif.
             </div>
 
-            <div class="space-y-1">
-              <strong class="text-slate-900">Pasal 5 — Ketentuan Hukum &amp; Pengesahan:</strong>
-              <p class="text-slate-700">
-                Perjanjian ini dibuat secara sah melalui sistem digital Ashtatic Internet Solution dan memiliki kekuatan hukum yang mengikat kedua belah pihak sesuai Undang-Undang Informasi dan Transaksi Elektronik (UU ITE) Republik Indonesia.
-              </p>
+            <div>
+              <strong style="color: #0f172a;">Pasal 5 — Ketentuan Hukum &amp; Keabsahan:</strong>
+              Perjanjian ini dibuat dan diterbitkan secara sah melalui sistem digital PT Ashtatic Internet Solution dan memiliki kekuatan hukum yang sah dan mengikat antara penyedia layanan dan Pelanggan sesuai UU Nomor 11 Tahun 2008 tentang Informasi dan Transaksi Elektronik (UU ITE) Republik Indonesia.
             </div>
           </div>
 
           <!-- PENGESAHAN DAN TANDA TANGAN (KOLOM DUA PIHAK + STEMPEL DIGITAL) -->
-          <div class="pt-4 border-t border-slate-300 grid grid-cols-2 gap-4 text-center text-[11px]">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; text-align: center; font-size: 9.5px; border-top: 1.5px solid #cbd5e1; padding-top: 8px; margin-top: 6px;">
             
-            <!-- PIHAK PERTAMA -->
-            <div class="flex flex-col items-center justify-between h-36">
+            <!-- PERUSAHAAN (ASHTATIC) -->
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 105px;">
               <div>
-                <span class="text-slate-500 text-[10px] uppercase font-bold block">PIHAK PERTAMA</span>
-                <span class="font-bold text-slate-900">ASHTATIC INTERNET SOLUTION</span>
+                <span style="font-weight: 800; color: #0f172a; font-size: 10.5px;">PT ASHTATIC INTERNET SOLUTION</span>
               </div>
               
               <!-- Stempel Resmi Digital Ashtatic -->
-              <div class="relative flex items-center justify-center my-1">
-                <div class="w-24 h-24 rounded-full border-2 border-dashed border-cyan-600 flex flex-col items-center justify-center text-cyan-700 p-1 transform -rotate-12 bg-cyan-50/50">
-                  <div class="text-[7px] font-black uppercase tracking-tighter">ASHTATIC SOLUTION</div>
-                  <i class="fa-solid fa-stamp text-xs my-0.5 text-cyan-600"></i>
-                  <div class="text-[8px] font-extrabold uppercase border-y border-cyan-600 py-0.5 px-1 tracking-wider">VERIFIED</div>
-                  <div class="text-[6px] font-bold">KONTRAK RESMI</div>
+              <div style="display: flex; align-items: center; justify-content: center; margin: 1px 0;">
+                <div style="width: 60px; height: 60px; border-radius: 50%; border: 1.5px dashed #0284c7; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #0369a1; padding: 2px; transform: rotate(-8deg); background: rgba(224, 242, 254, 0.45);">
+                  <div style="font-size: 6px; font-weight: 900; letter-spacing: 0.5px;">ASHTATIC</div>
+                  <div style="font-size: 7px; font-weight: 900; border-top: 1px solid #0284c7; border-bottom: 1px solid #0284c7; padding: 0.5px 2px; margin: 1px 0;">VERIFIED</div>
+                  <div style="font-size: 5.5px; font-weight: 700;">RESMI 2026</div>
                 </div>
               </div>
 
               <div>
-                <div class="font-bold text-slate-900 underline">Direktur Layanan Jaringan</div>
-                <div class="text-[10px] text-slate-500">PT Ashtatic Internet Solution</div>
+                <div style="font-weight: 800; color: #0f172a; text-decoration: underline;">Direktur Layanan Jaringan</div>
+                <div style="font-size: 8.5px; color: #64748b;">PT Ashtatic Internet Solution</div>
               </div>
             </div>
 
-            <!-- PIHAK KEDUA -->
-            <div class="flex flex-col items-center justify-between h-36">
+            <!-- PELANGGAN -->
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 105px;">
               <div>
-                <span class="text-slate-500 text-[10px] uppercase font-bold block">PIHAK KEDUA (PELANGGAN)</span>
-                <span id="pdfSignCustomerName" class="font-bold text-slate-900">-</span>
+                <span id="pdfSignCustomerName" style="font-weight: 800; color: #0f172a; font-size: 10.5px;">-</span>
               </div>
 
               <!-- Tanda Tangan Digital Pelanggan -->
-              <div class="flex flex-col items-center justify-center my-1 text-slate-400">
-                <i class="fa-solid fa-file-signature text-2xl text-emerald-600 mb-0.5"></i>
-                <span class="text-[9px] font-mono text-emerald-700 font-semibold">[TERSETUJUI SECARA DIGITAL]</span>
+              <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 1px 0; color: #047857;">
+                <i class="fa-solid fa-file-signature" style="font-size: 20px; color: #059669; margin-bottom: 1px;"></i>
+                <span style="font-size: 8px; font-family: monospace; font-weight: 700; color: #047857; background: #dcfce7; padding: 1px 5px; border-radius: 3px; border: 1px solid #86efac;">[TERVERIFIKASI &amp; AKTIF]</span>
               </div>
 
               <div>
-                <div id="pdfSignNameUnderline" class="font-bold text-slate-900 underline">-</div>
-                <div class="text-[10px] text-slate-500">Pelanggan Wifi AirPro</div>
+                <div id="pdfSignNameUnderline" style="font-weight: 800; color: #0f172a; text-decoration: underline;">-</div>
+                <div style="font-size: 8.5px; color: #64748b;">Pelanggan Wifi AirPro</div>
               </div>
             </div>
 
           </div>
 
           <!-- FOOTER DOKUMEN -->
-          <div class="pt-2 border-t border-slate-200 flex items-center justify-between text-[9px] text-slate-500">
-            <div>Dokumen sah diterbitkan otomatis oleh Ashtatic Internet Solution.</div>
-            <div>Halaman 1 dari 1</div>
+          <div style="display: flex; justify-content: space-between; font-size: 8px; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 3px; margin-top: 3px;">
+            <div>Dokumen kontrak resmi diterbitkan secara otomatis oleh sistem digital PT Ashtatic Internet Solution.</div>
+            <div style="font-weight: 700;">Halaman 1 dari 1</div>
           </div>
 
         </div>
