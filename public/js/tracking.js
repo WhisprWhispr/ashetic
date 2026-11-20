@@ -14,6 +14,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Setup WiFi UI Action Listeners
   setupWifiSectionActions();
+  // Setup Kontrak Berlangganan 2 Tahun (PDF & Modal)
+  setupContractSectionActions();
 
   // Periksa apakah ada parameter 'ticket' di URL (e.g. /tracking?ticket=ASH-2611-1024)
   const urlParams = new URLSearchParams(window.location.search);
@@ -99,6 +101,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Render WiFi Configuration Section (Khusus Terverifikasi ke atas)
     renderWifiConfigSection(data);
+
+    // Render Dokumen Kontrak & ID Langganan (Khusus Selesai / Aktif)
+    renderContractSection(data);
 
     // Setup Status Timeline
     renderTimelineSteps(data.status);
@@ -410,5 +415,141 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     timelineContainer.innerHTML = html;
+  }
+
+  // ========================================================
+  // RENDER SEKSI KONTRAK & ID LANGGANAN (KHUSUS STATUS SELESAI / AKTIF)
+  // ========================================================
+  function renderContractSection(data) {
+    const contractSection = document.getElementById("subscriptionContractSection");
+    if (!contractSection) return;
+
+    const isCompleted = (data.status === "selesai" || data.status === "aktif");
+
+    if (isCompleted) {
+      // Generate ID Langganan resmi (format: ASH-SUB-YYMM-XXXX) jika belum ada
+      const subId = data.subscriptionId || `ASH-SUB-${(data.ticketId || '').replace(/[^0-9]/g, '')}`;
+      data.subscriptionId = subId;
+
+      const subElem = document.getElementById("resSubscriptionId");
+      if (subElem) subElem.innerText = subId;
+
+      const priceElem = document.getElementById("contractPackagePrice");
+      if (priceElem) {
+        priceElem.innerText = data.packagePrice ? `Rp ${data.packagePrice.toLocaleString('id-ID')} / bln` : 'Rp 180.000 / bln';
+      }
+
+      contractSection.classList.remove("hidden");
+    } else {
+      contractSection.classList.add("hidden");
+    }
+  }
+
+  // ========================================================
+  // SETUP ACTIONS KONTRAK BERLANGGANAN 2 TAHUN & UNDUH PDF
+  // ========================================================
+  function setupContractSectionActions() {
+    const btnCopySubId = document.getElementById("btnCopySubId");
+    const btnOpenModal = document.getElementById("btnOpenContractModal");
+    const btnCloseModal = document.getElementById("btnCloseContractModal");
+    const modal = document.getElementById("contractModal");
+    const btnDownload = document.getElementById("btnDownloadContractPdf");
+    const btnModalDownload = document.getElementById("btnModalDownloadPdf");
+    const btnModalPrint = document.getElementById("btnModalPrintDoc");
+
+    // Salin ID Langganan
+    if (btnCopySubId) {
+      btnCopySubId.addEventListener("click", () => {
+        if (currentActiveRecord && currentActiveRecord.subscriptionId) {
+          navigator.clipboard.writeText(currentActiveRecord.subscriptionId);
+          showToast(`ID Langganan "${currentActiveRecord.subscriptionId}" berhasil disalin!`, "info");
+        }
+      });
+    }
+
+    // Buka Modal Pratinjau Dokumen Kontrak
+    if (btnOpenModal && modal) {
+      btnOpenModal.addEventListener("click", () => {
+        if (!currentActiveRecord) return;
+        populateContractData(currentActiveRecord);
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      });
+    }
+
+    // Tutup Modal
+    if (btnCloseModal && modal) {
+      btnCloseModal.addEventListener("click", () => {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      });
+    }
+
+    // Unduh File Kontrak PDF
+    const handlePdfDownload = async () => {
+      if (!currentActiveRecord) return;
+      populateContractData(currentActiveRecord);
+      
+      const element = document.getElementById("contractPdfContent");
+      const ticket = currentActiveRecord.ticketId || "Dokumen";
+      showToast("Sedang menyusun file PDF kontrak resmi...", "info", 2000);
+
+      if (typeof html2pdf !== "undefined" && element) {
+        const opt = {
+          margin:       [8, 8, 8, 8],
+          filename:     `Kontrak-Berlangganan-Ashtatic-${ticket}.pdf`,
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { scale: 2, useCORS: true, logging: false },
+          jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        try {
+          await html2pdf().set(opt).from(element).save();
+          showToast("Kontrak Berlangganan PDF berhasil diunduh!", "success");
+        } catch (pdfErr) {
+          console.error("html2pdf error, fallback to print dialog:", pdfErr);
+          window.print();
+        }
+      } else {
+        window.print();
+      }
+    };
+
+    if (btnDownload) {
+      btnDownload.addEventListener("click", handlePdfDownload);
+    }
+    if (btnModalDownload) {
+      btnModalDownload.addEventListener("click", handlePdfDownload);
+    }
+
+    // Cetak Dokumen Langsung
+    if (btnModalPrint) {
+      btnModalPrint.addEventListener("click", () => {
+        window.print();
+      });
+    }
+  }
+
+  // Populate data ke elemen lembar kertas A4 dokumen kontrak
+  function populateContractData(data) {
+    const subId = data.subscriptionId || `ASH-SUB-${(data.ticketId || '').replace(/[^0-9]/g, '')}`;
+    
+    const setTxt = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.innerText = val || "-";
+    };
+
+    setTxt("pdfDocNumber", `KTR/ASH-2026/${(data.ticketId || '').replace('ASH-', '')}`);
+    setTxt("pdfPrintDate", `Tanggal: ${data.createdAtReadable || new Date().toLocaleDateString('id-ID')}`);
+    setTxt("pdfSubId", subId);
+    setTxt("pdfTicketId", data.ticketId);
+    setTxt("pdfName", data.fullName);
+    setTxt("pdfPhone", data.phone);
+    setTxt("pdfEmail", data.email || "-");
+    setTxt("pdfAddress", data.address);
+    setTxt("pdfPackage", `${data.packageName || 'Paket Internet'} (${data.packageSpeed || 'AirPro'})`);
+    setTxt("pdfPrice", data.packagePrice ? `Rp ${data.packagePrice.toLocaleString('id-ID')} / Bulan (Bulan Pertama Rp 0)` : "Rp 180.000 / Bulan (Bulan Pertama Rp 0)");
+    setTxt("pdfSSID", data.wifiSSID || "Ashtatic-AirPro");
+    setTxt("pdfSignCustomerName", data.fullName);
+    setTxt("pdfSignNameUnderline", data.fullName);
   }
 });

@@ -444,6 +444,16 @@ function showDetailModal(item) {
   if (ssidEl) ssidEl.innerText = item.wifiSSID || "Belum diatur oleh pelanggan";
   if (passEl) passEl.innerText = item.wifiPassword || "Belum diatur";
 
+  const subBox = document.getElementById("modalDetSubBox");
+  const subEl = document.getElementById("modalDetSubId");
+  if (item.status === "selesai" || item.status === "aktif") {
+    const subId = item.subscriptionId || `ASH-SUB-${(item.ticketId || '').replace(/[^0-9]/g, '')}`;
+    if (subEl) subEl.innerText = subId;
+    if (subBox) subBox.classList.remove("hidden");
+  } else {
+    if (subBox) subBox.classList.add("hidden");
+  }
+
   modal.classList.remove("hidden");
   modal.classList.add("flex");
 }
