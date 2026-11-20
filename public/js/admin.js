@@ -416,6 +416,23 @@ function showDetailModal(item) {
   modal.classList.add("flex");
 }
 
+// Template Catatan Standar Berdasarkan Kategori Status Pemasangan
+const STATUS_NOTE_TEMPLATES = {
+  menunggu_verifikasi: "Menunggu verifikasi identitas dan validasi jangkauan area oleh tim CS.",
+  pending: "Menunggu verifikasi identitas dan validasi jangkauan area oleh tim CS.",
+  terverifikasi: "Data pendaftaran telah terverifikasi & disetujui. Pelanggan dapat mengatur Nama WiFi (SSID) & Kata Sandi melalui menu Tracking Tiket.",
+  survey: "Tim lapangan sedang melakukan validasi jangkauan frekuensi dan uji kuat sinyal Wifi AirPro di sekitar titik koordinat lokasi.",
+  verifikasi: "Tim lapangan sedang melakukan validasi jangkauan frekuensi dan uji kuat sinyal Wifi AirPro di sekitar titik koordinat lokasi.",
+  jadwal_teknisi: "Jadwal kunjungan teknisi telah ditentukan. Teknisi membawa unit Modem Wifi AirPro dan perlengkapan instalasi.",
+  scheduled: "Jadwal kunjungan teknisi telah ditentukan. Teknisi membawa unit Modem Wifi AirPro dan perlengkapan instalasi.",
+  pemasangan: "Teknisi sedang berada di lokasi untuk melakukan proses instalasi dan aktivasi perangkat Modem Wifi AirPro.",
+  in_progress: "Teknisi sedang berada di lokasi untuk melakukan proses instalasi dan aktivasi perangkat Modem Wifi AirPro.",
+  selesai: "Instalasi modem Wifi AirPro selesai, redaman sinyal sangat bagus dan koneksi internet telah aktif normal. Pelanggan puas.",
+  aktif: "Instalasi modem Wifi AirPro selesai, redaman sinyal sangat bagus dan koneksi internet telah aktif normal. Pelanggan puas.",
+  ditolak: "Pendaftaran dibatalkan atau ditunda sementara dikarenakan kendala jangkauan sinyal atau permohonan pelanggan.",
+  batal: "Pendaftaran dibatalkan atau ditunda sementara dikarenakan kendala jangkauan sinyal atau permohonan pelanggan."
+};
+
 // Modal Edit Status
 function showEditStatusModal(item) {
   selectedTicketForModal = item.ticketId;
@@ -424,9 +441,15 @@ function showEditStatusModal(item) {
 
   document.getElementById("editModalTicket").innerText = item.ticketId;
   document.getElementById("editModalCustomer").innerText = item.fullName;
-  document.getElementById("selectNewStatus").value = item.status;
+  
+  const selectStatus = document.getElementById("selectNewStatus");
+  selectStatus.value = item.status;
+  
   document.getElementById("inputTechnician").value = item.technician || "";
-  document.getElementById("inputAdminNotes").value = item.adminNotes || "";
+  
+  const noteInput = document.getElementById("inputAdminNotes");
+  // Tampilkan catatan yang tersimpan, atau jika kosong otomatis isi sesuai statusnya
+  noteInput.value = item.adminNotes || STATUS_NOTE_TEMPLATES[item.status] || "";
 
   modal.classList.remove("hidden");
   modal.classList.add("flex");
@@ -452,6 +475,36 @@ function setupModalEvents() {
       editModal.classList.add("hidden");
       editModal.classList.remove("flex");
     };
+  }
+
+  // SINKRONISASI OTOMATIS: Catatan Internal Menyesuaikan Kategori Status yang Dipilih
+  const selectStatus = document.getElementById("selectNewStatus");
+  const noteInput = document.getElementById("inputAdminNotes");
+  const btnApplyTemplate = document.getElementById("btnApplyTemplateNote");
+
+  if (selectStatus && noteInput) {
+    selectStatus.addEventListener("change", () => {
+      const selected = selectStatus.value;
+      if (STATUS_NOTE_TEMPLATES[selected]) {
+        noteInput.value = STATUS_NOTE_TEMPLATES[selected];
+
+        // Efek visual highlight pada textarea
+        noteInput.classList.add("border-cyan-400", "bg-cyan-950/40");
+        setTimeout(() => {
+          noteInput.classList.remove("border-cyan-400", "bg-cyan-950/40");
+        }, 600);
+      }
+    });
+  }
+
+  if (btnApplyTemplate && selectStatus && noteInput) {
+    btnApplyTemplate.addEventListener("click", () => {
+      const selected = selectStatus.value;
+      if (STATUS_NOTE_TEMPLATES[selected]) {
+        noteInput.value = STATUS_NOTE_TEMPLATES[selected];
+        showToast("Catatan berhasil disesuaikan dengan kategori status!", "info");
+      }
+    });
   }
 
   // Submit Form Edit Status
@@ -570,8 +623,21 @@ function setupManualAdd() {
 
   if (openBtn && modal) {
     openBtn.addEventListener("click", () => {
+      const manStatus = document.getElementById("manStatus");
+      const manNotes = document.getElementById("manNotes");
+      if (manStatus && manNotes && !manNotes.value) {
+        manNotes.value = STATUS_NOTE_TEMPLATES[manStatus.value] || "";
+      }
       modal.classList.remove("hidden");
       modal.classList.add("flex");
+    });
+  }
+
+  const manStatus = document.getElementById("manStatus");
+  const manNotes = document.getElementById("manNotes");
+  if (manStatus && manNotes) {
+    manStatus.addEventListener("change", () => {
+      manNotes.value = STATUS_NOTE_TEMPLATES[manStatus.value] || "";
     });
   }
 

@@ -325,10 +325,19 @@
         </div>
 
         <div>
-          <label class="block font-bold uppercase tracking-wider text-slate-300 mb-1">
-            Catatan Internal / Petunjuk untuk Pelanggan
-          </label>
-          <textarea id="inputAdminNotes" rows="2" placeholder="Contoh: Sinyal kuat -52dBm, jadwal pasang hari Sabtu jam 10 pagi..." class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm focus:outline-none focus:border-cyan-400"></textarea>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block font-bold uppercase tracking-wider text-slate-300 text-[11px]">
+              Catatan Internal / Petunjuk untuk Pelanggan
+            </label>
+            <button type="button" id="btnApplyTemplateNote" class="text-[10px] text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1 transition" title="Sesuaikan catatan dengan status yang dipilih">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Reset Sesuai Status
+            </button>
+          </div>
+          <textarea id="inputAdminNotes" rows="3" placeholder="Pilih status di atas untuk rekomendasi catatan otomatis..." class="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs leading-relaxed focus:outline-none focus:border-cyan-400 transition-colors"></textarea>
+          <div class="text-[10px] text-slate-400 mt-1 flex items-center gap-1">
+            <i class="fa-solid fa-circle-info text-cyan-400"></i>
+            <span>Catatan otomatis berganti mengikuti status, Anda tetap bebas mengeditnya.</span>
+          </div>
         </div>
 
         <button type="submit" class="w-full py-3 rounded-xl btn-neon-cyan text-xs font-bold uppercase tracking-wider shadow-lg">
