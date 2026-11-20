@@ -177,6 +177,7 @@
                 <th class="px-4 py-3">Paket</th>
                 <th class="px-4 py-3">Alamat</th>
                 <th class="px-4 py-3">Status</th>
+                <th class="px-4 py-3">WiFi (SSID &amp; Sandi)</th>
                 <th class="px-4 py-3">Tanggal</th>
                 <th class="px-4 py-3 text-right">Aksi</th>
               </tr>
@@ -299,6 +300,26 @@
         <button id="btnCloseEditModal" class="text-slate-400 hover:text-white text-xl p-1">
           <i class="fa-solid fa-xmark"></i>
         </button>
+      </div>
+
+      <!-- KOTAK INFORMASI NAMA WIFI & PASSWORD DARI PELANGGAN -->
+      <div class="p-3.5 rounded-xl bg-gradient-to-r from-cyan-950/80 via-[#0a1638] to-purple-950/80 border border-cyan-400/60 space-y-2 shadow-[0_0_15px_rgba(0,240,255,0.2)]">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-cyan-300 flex items-center gap-1.5">
+            <i class="fa-solid fa-wifi text-cyan-400"></i> Data WiFi Pelanggan (AirPro)
+          </span>
+          <span id="editModalWifiBadge" class="text-[10px] font-semibold text-amber-300"></span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+          <div class="p-2 rounded-lg bg-slate-950/80 border border-slate-800">
+            <span class="text-[10px] text-slate-400 block mb-0.5">Nama WiFi (SSID):</span>
+            <div id="editModalSSID" class="font-bold text-white font-mono break-all">-</div>
+          </div>
+          <div class="p-2 rounded-lg bg-slate-950/80 border border-slate-800">
+            <span class="text-[10px] text-slate-400 block mb-0.5">Kata Sandi (Password):</span>
+            <div id="editModalPass" class="font-bold text-amber-300 font-mono break-all">-</div>
+          </div>
+        </div>
       </div>
 
       <form id="editStatusForm" class="space-y-3.5 text-xs">

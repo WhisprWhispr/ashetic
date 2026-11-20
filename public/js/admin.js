@@ -244,6 +244,22 @@ function renderTable() {
         <td class="px-4 py-3 whitespace-nowrap">
           ${statusBadge}
         </td>
+        <td class="px-4 py-3 whitespace-nowrap">
+          ${item.wifiSSID ? `
+            <div class="space-y-0.5">
+              <div class="font-mono text-cyan-300 font-bold text-xs flex items-center gap-1.5">
+                <i class="fa-solid fa-wifi text-cyan-400 text-[10px]"></i> ${item.wifiSSID}
+              </div>
+              <div class="font-mono text-amber-300 text-[11px] flex items-center gap-1">
+                <i class="fa-solid fa-key text-[9px] text-amber-400"></i> ${item.wifiPassword || '-'}
+              </div>
+            </div>
+          ` : `
+            <span class="text-slate-500 text-[11px] italic flex items-center gap-1">
+              <i class="fa-solid fa-clock text-[10px]"></i> Belum disetel
+            </span>
+          `}
+        </td>
         <td class="px-4 py-3 text-xs text-slate-400 whitespace-nowrap">
           ${dateFormatted}
         </td>
@@ -283,6 +299,22 @@ function renderTable() {
             <i class="fa-solid fa-location-dot text-[11px] text-cyan-400 mr-1"></i> ${item.address}
           </div>
         </div>
+
+        ${item.wifiSSID ? `
+          <div class="p-2.5 rounded-lg bg-cyan-950/60 border border-cyan-500/40 text-xs space-y-1">
+            <div class="text-[10px] uppercase font-bold text-cyan-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-wifi"></i> WiFi Pelanggan (AirPro):
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-[11px] font-mono pt-0.5">
+              <div><span class="text-slate-400 text-[10px] block">SSID:</span> <span class="text-white font-bold">${item.wifiSSID}</span></div>
+              <div><span class="text-slate-400 text-[10px] block">Sandi:</span> <span class="text-amber-300 font-bold">${item.wifiPassword || '-'}</span></div>
+            </div>
+          </div>
+        ` : `
+          <div class="text-[11px] text-slate-500 italic flex items-center gap-1 px-1">
+            <i class="fa-solid fa-wifi text-[10px] text-slate-600"></i> WiFi: Belum diatur pelanggan
+          </div>
+        `}
 
         <div class="flex items-center justify-between pt-1 gap-2">
           <a href="https://wa.me/${waPhone}?text=${waMessage}" target="_blank" class="inline-flex items-center gap-1.5 text-xs text-emerald-400 font-semibold bg-emerald-950/60 px-3 py-1.5 rounded-lg border border-emerald-500/30">
@@ -447,6 +479,21 @@ function showEditStatusModal(item) {
   
   document.getElementById("inputTechnician").value = item.technician || "";
   
+  // Tampilkan data WiFi Pelanggan di Modal Ubah Status
+  const editSSID = document.getElementById("editModalSSID");
+  const editPass = document.getElementById("editModalPass");
+  const editBadge = document.getElementById("editModalWifiBadge");
+
+  if (item.wifiSSID) {
+    if (editSSID) editSSID.innerText = item.wifiSSID;
+    if (editPass) editPass.innerText = item.wifiPassword || "-";
+    if (editBadge) editBadge.innerHTML = `<span class="inline-flex items-center gap-1 text-emerald-400 font-bold bg-emerald-950/70 border border-emerald-500/40 px-2 py-0.5 rounded-full"><i class="fa-solid fa-circle-check text-[10px]"></i> Sudah Dikonfigurasi</span>`;
+  } else {
+    if (editSSID) editSSID.innerText = "Belum diatur oleh pelanggan";
+    if (editPass) editPass.innerText = "Belum diatur";
+    if (editBadge) editBadge.innerHTML = `<span class="inline-flex items-center gap-1 text-amber-400 font-bold bg-amber-950/70 border border-amber-500/40 px-2 py-0.5 rounded-full"><i class="fa-solid fa-clock text-[10px]"></i> Belum Diatur</span>`;
+  }
+
   const noteInput = document.getElementById("inputAdminNotes");
   // Tampilkan catatan yang tersimpan, atau jika kosong otomatis isi sesuai statusnya
   noteInput.value = item.adminNotes || STATUS_NOTE_TEMPLATES[item.status] || "";
