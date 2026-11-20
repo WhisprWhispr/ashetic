@@ -153,11 +153,36 @@ export async function trackRegistration(searchQuery) {
 
 /**
  * Mengambil seluruh data pendaftaran untuk Panel Admin
+ * UTAMA: Mengambil data real langsung dari Cloud Firestore!
  */
 export async function getAdminRegistrations(adminToken = "") {
   let list = [];
 
-  // Coba ambil dari Server Node.js (yang mengagregasi semua data)
+  // 1. PRIORITAS UTAMA: Ambil langsung dari Firebase Firestore
+  if (isFirestoreAvailable && db) {
+    try {
+      const colRef = collection(db, "registrations");
+      let snapshot;
+      try {
+        const q = query(colRef, orderBy("createdAt", "desc"));
+        snapshot = await getDocs(q);
+      } catch (qErr) {
+        // Fallback jika index belum dibuat
+        snapshot = await getDocs(colRef);
+      }
+
+      snapshot.forEach(docSnap => {
+        list.push(docSnap.data());
+      });
+
+      console.log(`✅ Dimuat ${list.length} data pendaftaran langsung dari Firebase Firestore.`);
+      return list;
+    } catch (fsErr) {
+      console.warn("⚠️ Firestore admin fetch error:", fsErr);
+    }
+  }
+
+  // 2. Fallback cadangan dari Server Node.js (jika Firestore offline)
   try {
     const res = await fetch("/api/admin/registrations", {
       headers: { "Authorization": `Bearer ${adminToken}` }
@@ -165,23 +190,9 @@ export async function getAdminRegistrations(adminToken = "") {
     const resData = await res.json();
     if (resData.success && Array.isArray(resData.registrations)) {
       list = resData.registrations;
-      return list;
     }
   } catch (err) {
-    console.warn("⚠️ Server admin fetch failed, checking Firestore directly:", err);
-  }
-
-  // Jika server gagal, coba langsung dari Firestore
-  if (isFirestoreAvailable && db) {
-    try {
-      const q = query(collection(db, "registrations"), orderBy("createdAt", "desc"));
-      const snapshot = await getDocs(q);
-      snapshot.forEach(docSnap => {
-        list.push(docSnap.data());
-      });
-    } catch (fsErr) {
-      console.warn("⚠️ Firestore admin fetch error:", fsErr);
-    }
+    console.warn("⚠️ Server admin fetch failed:", err);
   }
 
   return list;
