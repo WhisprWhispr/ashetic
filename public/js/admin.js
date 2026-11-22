@@ -360,7 +360,7 @@ function getStatusBadge(status) {
       return `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-950/70 text-purple-300 border border-purple-500/50 flex items-center gap-1.5 w-fit"><i class="fa-solid fa-wrench text-[10px]"></i> Sedang Pasang</span>`;
     case "selesai":
     case "aktif":
-      return `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-950/70 text-emerald-300 border border-emerald-500/50 flex items-center gap-1.5 w-fit"><i class="fa-solid fa-circle-check text-[10px]"></i> Selesai/Aktif</span>`;
+      return `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-950/70 text-emerald-300 border border-emerald-500/50 flex items-center gap-1.5 w-fit"><i class="fa-solid fa-circle-check text-[10px]"></i> Selesai & Internet Aktif</span>`;
     case "ditolak":
     case "batal":
       return `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-red-950/70 text-red-300 border border-red-500/50 flex items-center gap-1.5 w-fit"><i class="fa-solid fa-ban text-[10px]"></i> Dibatalkan</span>`;
@@ -376,7 +376,7 @@ function getStatusText(status) {
     case "survey": case "verifikasi": return "Survey & Cek Sinyal Wifi AirPro";
     case "jadwal_teknisi": case "scheduled": return "Jadwal Kunjungan Teknisi Ditentukan";
     case "pemasangan": case "in_progress": return "Sedang Dilakukan Pemasangan Modem di Lokasi";
-    case "selesai": case "aktif": return "Pemasangan Selesai & Internet Aktif!";
+    case "selesai": case "aktif": return "Selesai & Internet Aktif";
     case "ditolak": case "batal": return "Pendaftaran Dibatalkan";
     default: return status;
   }

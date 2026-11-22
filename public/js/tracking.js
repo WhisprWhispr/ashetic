@@ -150,7 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return "Sedang Dilakukan Pemasangan di Lokasi";
       case "selesai":
       case "aktif":
-        return "Pemasangan Selesai & Internet Aktif";
+        return "Selesai & Internet Aktif";
       case "ditolak":
       case "batal":
         return "Pendaftaran Dibatalkan / Di Luar Jangkauan";
@@ -369,6 +369,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (badgeStatusElem) {
         badgeStatusElem.className = "px-3 py-1 rounded-full text-xs font-bold bg-red-900/60 border border-red-500 text-red-300";
         badgeStatusElem.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> Dibatalkan / Perlu Penyesuaian`;
+      }
+    } else if (currentStatus === "selesai" || currentStatus === "aktif") {
+      if (badgeStatusElem) {
+        badgeStatusElem.className = "px-3 py-1 rounded-full text-xs font-bold bg-emerald-950/90 border border-emerald-400 text-emerald-300 shadow-[0_0_12px_rgba(52,211,153,0.35)]";
+        badgeStatusElem.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 mr-1.5"></i> Selesai & Internet Aktif`;
       }
     } else {
       if (badgeStatusElem) {
