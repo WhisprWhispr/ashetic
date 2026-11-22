@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>Lapor Gangguan Jaringan | Ashtatic Internet Solution</title>
+  <meta name="description" content="Layanan bantuan & tiket laporan gangguan jaringan Wifi AirPro Ashtatic Internet Solution. Laporkan kendala koneksi, internet mati, lemot, atau permohonan ganti sandi WiFi secara instan.">
+  <meta name="theme-color" content="#040816">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              cyan: '#00F0FF',
+              blue: '#0070F3',
+              purple: '#7928CA',
+              dark: '#040816',
+              darker: '#02040A',
+              card: '#081028',
+              accent: '#38bdf8'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #040816;
+      color: #F1F5F9;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .cyber-grid {
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(0, 240, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
+    }
+    .glass-card {
+      background: rgba(8, 16, 40, 0.75);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(0, 240, 255, 0.15);
+    }
+    .glow-cyan-sm {
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.15);
+    }
+    .glow-rose-sm {
+      box-shadow: 0 0 25px rgba(244, 63, 94, 0.2);
+    }
+    .btn-neon-cyan {
+      background: linear-gradient(135deg, #00F0FF 0%, #0070F3 100%);
+      color: #040816;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+    }
+    .btn-neon-cyan:hover {
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.7);
+      transform: translateY(-1px);
+    }
+    .category-card {
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .category-card:hover {
+      border-color: rgba(0, 240, 255, 0.5);
+      background: rgba(15, 23, 42, 0.9);
+      transform: translateY(-2px);
+    }
+    .category-card.selected {
+      border-color: #00F0FF;
+      background: rgba(8, 47, 73, 0.6);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+    }
+    .category-card.selected-rose {
+      border-color: #f43f5e;
+      background: rgba(88, 28, 44, 0.5);
+      box-shadow: 0 0 20px rgba(244, 63, 94, 0.35);
+    }
+  </style>
+</head>
+<body class="cyber-grid">
+
+  <!-- ======================================================== -->
+  <!-- NAVBAR / HEADER -->
+  <!-- ======================================================== -->
+  <header class="bg-[#040816]/90 backdrop-blur-md border-b border-cyan-500/20 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2 group">
+        <img src="/images/logo.svg" alt="Ashtatic Internet Solution" class="h-8 sm:h-11 w-auto transition-transform group-hover:scale-105">
+      </a>
+      <div class="flex items-center gap-2 sm:gap-3 text-xs font-semibold">
+        <a href="/wifi-manager" class="hidden sm:flex px-3 py-1.5 rounded-lg bg-cyan-950/40 border border-cyan-500/30 text-cyan-300 hover:text-white transition items-center gap-1.5">
+          <i class="fa-solid fa-users-viewfinder"></i> Kelola WiFi
+        </a>
+        <a href="/tracking" class="hidden sm:flex px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:text-cyan-400 transition items-center gap-1.5">
+          <i class="fa-solid fa-satellite-dish"></i> Lacak Status
+        </a>
+        <a href="/" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:text-cyan-400 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-arrow-left"></i> <span class="hidden xs:inline">Kembali ke</span> Beranda
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ======================================================== -->
+  <!-- MAIN CONTAINER -->
+  <!-- ======================================================== -->
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 w-full flex-grow space-y-8">
+
+    <!-- HERO HEADER -->
+    <div class="text-center space-y-3">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-rose-950/80 border border-rose-500/40 text-rose-300 text-xs font-bold uppercase tracking-wider glow-rose-sm">
+        <i class="fa-solid fa-headset text-rose-400"></i> PUSAT BANTUAN &amp; TIKET GANGGUAN
+      </div>
+      <h1 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+        Lapor Kendala Jaringan <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-pink-400 to-cyan-400">Ashtatic AirPro</span>
+      </h1>
+      <p class="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto leading-relaxed">
+        Mengalami masalah internet, WiFi lemot, lampu LOS merah, atau ingin mengajukan perubahan sandi WiFi? Masukkan ID Langganan Anda untuk membuat tiket laporan teknis secara instan.
+      </p>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- STEP 1: PENCARIAN & VALIDASI ID LANGGANAN -->
+    <!-- ======================================================== -->
+    <div class="p-6 sm:p-8 rounded-2xl sm:rounded-3xl glass-card border border-rose-500/30 glow-rose-sm space-y-5">
+      <div class="flex items-center gap-3 pb-3 border-b border-slate-800">
+        <div class="w-9 h-9 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 text-sm font-black">
+          1
+        </div>
+        <div>
+          <h2 class="text-base sm:text-lg font-bold text-white">Masukkan ID Langganan / No. Tiket Pendaftaran</h2>
+          <p class="text-xs text-slate-400">Gunakan ID Langganan (contoh: <code class="text-rose-300 font-mono">ASH-SUB-2611-2275</code>) atau nomor tiket pemasangan Anda.</p>
+        </div>
+      </div>
+
+      <!-- Form Cari Pelanggan -->
+      <form id="searchCustomerForm" class="space-y-4">
+        <div class="flex flex-col sm:flex-row gap-3">
+          <div class="relative flex-grow">
+            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+              <i class="fa-solid fa-id-card-clip text-sm"></i>
+            </div>
+            <input 
+              type="text" 
+              id="inputCustomerId" 
+              placeholder="Contoh: ASH-SUB-2611-2275 atau ASH-2611-2275" 
+              required
+              class="w-full pl-10 pr-4 py-3 bg-slate-950/90 border border-slate-700 rounded-xl text-white font-mono text-sm uppercase placeholder:normal-case placeholder:text-slate-500 focus:outline-none focus:border-rose-400 transition"
+            >
+          </div>
+          <button 
+            type="submit" 
+            id="btnCheckCustomer"
+            class="px-6 py-3 rounded-xl bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-bold text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 shrink-0 transition"
+          >
+            <i class="fa-solid fa-magnifying-glass"></i> Verifikasi Data
+          </button>
+        </div>
+      </form>
+
+      <!-- Customer Verified Card (Hidden until found) -->
+      <div id="customerVerifiedBox" class="hidden p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-950/80 via-[#071f2c] to-slate-900 border border-emerald-400/50 space-y-3 animate-fade-in">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-emerald-500/20 pb-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-400 text-base">
+              <i class="fa-solid fa-user-check"></i>
+            </div>
+            <div>
+              <span class="text-[10px] font-mono uppercase text-emerald-400 font-bold tracking-wider">PELANGGAN TERVERIFIKASI</span>
+              <h3 id="detCustomerName" class="text-base font-extrabold text-white leading-tight">-</h3>
+            </div>
+          </div>
+          <button type="button" id="btnResetCustomer" class="text-xs text-slate-400 hover:text-rose-400 flex items-center gap-1.5 self-start sm:self-auto py-1 px-2.5 rounded-lg bg-slate-900 border border-slate-700 transition">
+            <i class="fa-solid fa-rotate-left"></i> Ganti ID
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+          <div class="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800">
+            <span class="text-slate-400 block text-[11px] mb-0.5">ID Langganan:</span>
+            <span id="detSubscriptionId" class="font-mono font-bold text-emerald-300">-</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800">
+            <span class="text-slate-400 block text-[11px] mb-0.5">Paket Internet:</span>
+            <span id="detPackageName" class="font-bold text-cyan-300">-</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800">
+            <span class="text-slate-400 block text-[11px] mb-0.5">Nomor WhatsApp:</span>
+            <span id="detCustomerPhone" class="font-mono font-semibold text-slate-200">-</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- STEP 2: FORMULIR KENDALA GANGGUAN JARINGAN -->
+    <!-- ======================================================== -->
+    <div id="reportSection" class="p-6 sm:p-8 rounded-2xl sm:rounded-3xl glass-card border border-slate-800 space-y-6">
+      <div class="flex items-center gap-3 pb-3 border-b border-slate-800">
+        <div class="w-9 h-9 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400 text-sm font-black">
+          2
+        </div>
+        <div>
+          <h2 class="text-base sm:text-lg font-bold text-white">Pilih Jenis Kendala &amp; Isi Rincian Laporan</h2>
+          <p class="text-xs text-slate-400">Pilih salah satu kategori gangguan jaringan yang sedang Anda alami di bawah ini.</p>
+        </div>
+      </div>
+
+      <form id="reportForm" class="space-y-6">
+        
+        <!-- Grid Kategori Gangguan -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-3">
+            Kategori Kendala <span class="text-rose-400">*</span>
+          </label>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="categoryGrid">
+            
+            <!-- Kategori 1: Mati Total / LOS Merah -->
+            <div class="category-card p-4 rounded-xl bg-slate-950/80 border border-slate-800 relative select-none" data-cat="mati_total" data-label="Tidak Ada Internet / Lampu LOS Merah">
+              <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-lg bg-rose-500/20 border border-rose-500/40 text-rose-400 flex items-center justify-center shrink-0 text-base">
+                  <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                  <h4 class="font-bold text-white text-xs sm:text-sm">Tidak Ada Internet / LOS Merah</h4>
+                  <p class="text-[11px] text-slate-400 mt-0.5 leading-snug">Lampu indikator modem merah berkedip, tidak ada sambungan sama sekali.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Kategori 2: Lemot / Ngeleg -->
+            <div class="category-card p-4 rounded-xl bg-slate-950/80 border border-slate-800 relative select-none" data-cat="lemot_ngeleg" data-label="Koneksi Lemot / Nge-lag / Ping Tinggi">
+              <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center shrink-0 text-base">
+                  <i class="fa-solid fa-gauge-simple-high"></i>
+                </div>
+                <div>
+                  <h4 class="font-bold text-white text-xs sm:text-sm">Koneksi Lemot / Ping Tinggi</h4>
+                  <p class="text-[11px] text-slate-400 mt-0.5 leading-snug">Kecepatan terasa sangat lambat, sering buffering atau lag bermain game.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Kategori 3: WiFi Putus-Putus -->
+            <div class="category-card p-4 rounded-xl bg-slate-950/80 border border-slate-800 relative select-none" data-cat="putus_putus" data-label="Sinyal WiFi Sering Putus / Sinyal Lemah">
+              <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-lg bg-sky-500/20 border border-sky-500/40 text-sky-400 flex items-center justify-center shrink-0 text-base">
+                  <i class="fa-solid fa-wifi"></i>
+                </div>
+                <div>
+                  <h4 class="font-bold text-white text-xs sm:text-sm">WiFi Sering Terputus</h4>
+                  <p class="text-[11px] text-slate-400 mt-0.5 leading-snug">Sinyal WiFi sering mendadak hilang atau disconnect otomatis di perangkat.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Kategori 4: Ganti Nama WiFi / Password -->
+            <div class="category-card p-4 rounded-xl bg-slate-950/80 border border-slate-800 relative select-none" data-cat="ganti_wifi" data-label="Permintaan Ganti Nama WiFi & Sandi">
+              <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-lg bg-purple-500/20 border border-purple-500/40 text-purple-400 flex items-center justify-center shrink-0 text-base">
+                  <i class="fa-solid fa-key"></i>
+                </div>
+                <div>
+                  <h4 class="font-bold text-white text-xs sm:text-sm">Ganti Nama WiFi &amp; Sandi</h4>
+                  <p class="text-[11px] text-slate-400 mt-0.5 leading-snug">Permintaan perubahan nama sinyal WiFi (SSID) atau kata sandi baru.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Kategori 5: Relokasi Modem -->
+            <div class="category-card p-4 rounded-xl bg-slate-950/80 border border-slate-800 relative select-none" data-cat="relokasi_modem" data-label="Permintaan Relokasi / Pindah Modem AirPro">
+              <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-lg bg-teal-500/20 border border-teal-500/40 text-teal-400 flex items-center justify-center shrink-0 text-base">
+                  <i class="fa-solid fa-arrows-up-down-left-right"></i>
+                </div>
+                <div>
+                  <h4 class="font-bold text-white text-xs sm:text-sm">Relokasi / Pindah Modem</h4>
+                  <p class="text-[11px] text-slate-400 mt-0.5 leading-snug">Ingin memindahkan posisi letak perangkat modem AirPro ke ruangan lain.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Kategori 6: Lainnya -->
+            <div class="category-card p-4 rounded-xl bg-slate-950/80 border border-slate-800 relative select-none" data-cat="lainnya" data-label="Kendala Teknis Lainnya">
+              <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-lg bg-slate-600/30 border border-slate-500/40 text-slate-300 flex items-center justify-center shrink-0 text-base">
+                  <i class="fa-solid fa-circle-question"></i>
+                </div>
+                <div>
+                  <h4 class="font-bold text-white text-xs sm:text-sm">Kendala Teknis Lainnya</h4>
+                  <p class="text-[11px] text-slate-400 mt-0.5 leading-snug">Konsultasi router, adaptor listrik, tagihan, atau pertanyaan teknis lain.</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <input type="hidden" id="selectedCategory" required value="">
+          <input type="hidden" id="selectedCategoryLabel" value="">
+        </div>
+
+        <!-- Khusus Kategori Ganti WiFi: Input Nama & Password Baru -->
+        <div id="customWifiInputBox" class="hidden p-4 rounded-2xl bg-purple-950/40 border border-purple-500/40 space-y-3">
+          <div class="flex items-center gap-2 text-xs font-bold text-purple-300">
+            <i class="fa-solid fa-pen-to-square"></i> Konfigurasi Nama &amp; Sandi WiFi Baru Yang Diinginkan:
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-300 text-[11px] font-semibold mb-1">Nama WiFi (SSID) Baru:</label>
+              <input type="text" id="reqNewSSID" placeholder="Contoh: Ashtatic-Fauzi-5G" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-purple-500/30 text-white text-xs font-mono focus:outline-none focus:border-purple-400">
+            </div>
+            <div>
+              <label class="block text-slate-300 text-[11px] font-semibold mb-1">Kata Sandi (Password) Baru:</label>
+              <input type="text" id="reqNewPass" placeholder="Minimal 8 karakter..." class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-purple-500/30 text-white text-xs font-mono focus:outline-none focus:border-purple-400">
+            </div>
+          </div>
+        </div>
+
+        <!-- Tingkat Urgensi & Nomor Telepon/WhatsApp -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="inputUrgency" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+              Tingkat Urgensi <span class="text-rose-400">*</span>
+            </label>
+            <select id="inputUrgency" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-cyan-400 transition">
+              <option value="mendesak">🔴 Mendesak (Internet Mati / Kebutuhan Kerja Penting)</option>
+              <option value="sedang" selected>🟡 Sedang (Koneksi Lemot / Gangguan Sebagian)</option>
+              <option value="standar">🟢 Standar / Terjadwal (Permintaan Ganti Sandi / Relokasi)</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="inputContactPhone" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+              Nomor WhatsApp untuk Dihubungi <span class="text-rose-400">*</span>
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <i class="fa-brands fa-whatsapp text-emerald-400 text-sm"></i>
+              </div>
+              <input 
+                type="tel" 
+                id="inputContactPhone" 
+                required 
+                placeholder="08xxxxxxxxxx" 
+                class="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs font-mono focus:outline-none focus:border-cyan-400 transition"
+              >
+            </div>
+            <p class="text-[10px] text-slate-400 mt-1">Teknisi lapangan kami akan menghubungi nomor ini untuk konfirmasi.</p>
+          </div>
+        </div>
+
+        <!-- Deskripsi Gangguan -->
+        <div>
+          <label for="inputDescription" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+            Rincian Deskripsi Kendala / Catatan Tambahan <span class="text-rose-400">*</span>
+          </label>
+          <textarea 
+            id="inputDescription" 
+            rows="3" 
+            required 
+            placeholder="Jelaskan secara singkat kendala yang terjadi, sejak kapan terjadi, dan lampu indikator modem yang menyala..."
+            class="w-full p-3.5 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs focus:outline-none focus:border-cyan-400 transition"
+          ></textarea>
+        </div>
+
+        <!-- Tombol Submit -->
+        <div class="pt-2">
+          <button 
+            type="submit" 
+            id="btnSubmitReport"
+            class="w-full py-4 rounded-xl btn-neon-cyan text-xs sm:text-sm font-extrabold uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl transition"
+          >
+            <i class="fa-solid fa-paper-plane"></i> Kirim Laporan Gangguan ke Tim Teknisi
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- SUCCESS MODAL / REPORT TICKET GENERATED -->
+    <!-- ======================================================== -->
+    <div id="reportSuccessModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+      <div class="w-full max-w-lg bg-[#081028] border-2 border-emerald-400/80 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-[0_0_50px_rgba(16,185,129,0.3)] space-y-5 text-center">
+        
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-emerald-500/20 border border-emerald-400/50 flex items-center justify-center text-emerald-400 text-3xl shadow-[0_0_25px_rgba(16,185,129,0.5)]">
+          <i class="fa-solid fa-circle-check"></i>
+        </div>
+
+        <div>
+          <span class="inline-block px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-950 text-emerald-300 border border-emerald-400/40 mb-2">
+            TIKET GANGGUAN RESMI DITERBITKAN
+          </span>
+          <h3 class="text-xl sm:text-2xl font-black text-white">Laporan Anda Telah Terkirim!</h3>
+          <p class="text-xs text-slate-300 mt-1">Tim teknisi Ashtatic telah menerima laporan kendala Anda dan sedang melakukan pengecekan.</p>
+        </div>
+
+        <!-- Ticket Card Box -->
+        <div class="p-4 rounded-2xl bg-slate-950/90 border border-emerald-500/40 text-left space-y-2.5">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">NOMOR TIKET LAPORAN</span>
+            <div class="flex items-center gap-1.5">
+              <span id="succReportId" class="text-base font-black text-emerald-300 font-mono tracking-wider">-</span>
+              <button type="button" id="btnCopyReportId" class="p-1 px-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition" title="Salin Nomor Tiket">
+                <i class="fa-regular fa-copy"></i>
+              </button>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <span class="text-slate-400 text-[11px] block">Nama Pelanggan:</span>
+              <span id="succCustomerName" class="font-bold text-white">-</span>
+            </div>
+            <div>
+              <span class="text-slate-400 text-[11px] block">Kategori Gangguan:</span>
+              <span id="succCategoryLabel" class="font-bold text-rose-300 truncate block">-</span>
+            </div>
+          </div>
+          <div class="text-[11px] text-slate-300 pt-1">
+            <span class="text-slate-400 block">Status:</span>
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-950/70 border border-amber-500/40 text-amber-300 font-bold text-[10px]">
+              <i class="fa-solid fa-clock"></i> Menunggu Penanganan Teknisi
+            </span>
+          </div>
+        </div>
+
+        <!-- Direct WhatsApp Action Button -->
+        <div class="space-y-2 pt-2">
+          <a 
+            id="btnWhatsAppForward" 
+            href="#" 
+            target="_blank" 
+            class="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.4)] transition"
+          >
+            <i class="fa-brands fa-whatsapp text-lg"></i> Teruskan Tiket ke WhatsApp CS / Teknisi
+          </a>
+          <button 
+            type="button" 
+            id="btnCloseSuccessModal"
+            class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold transition"
+          >
+            Tutup Pratinjau
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- RIWAYAT LAPORAN SEBELUMNYA (JIKA ADA) -->
+    <!-- ======================================================== -->
+    <div id="reportHistorySection" class="hidden p-6 sm:p-8 rounded-2xl sm:rounded-3xl glass-card border border-slate-800 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <h3 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-clock-rotate-left text-cyan-400"></i> Riwayat Tiket Gangguan Anda
+        </h3>
+        <span id="reportHistoryCount" class="text-xs px-2.5 py-0.5 rounded-full bg-cyan-950 border border-cyan-500/40 text-cyan-300 font-bold">0 Laporan</span>
+      </div>
+
+      <div id="reportHistoryList" class="space-y-3">
+        <!-- Injected by lapor.js -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- FOOTER -->
+  <!-- ======================================================== -->
+  <footer class="bg-[#02040A] border-t border-slate-800/80 py-6 text-xs text-slate-400 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div>Ashtatic Internet Solution &copy; 2026 • Layanan Tiket Dukungan Jaringan AirPro</div>
+      <div class="flex items-center gap-4">
+        <a href="/" class="hover:text-cyan-400 transition">Beranda</a>
+        <a href="/wifi-manager" class="hover:text-cyan-400 transition">Kelola WiFi</a>
+        <a href="/tracking" class="hover:text-cyan-400 transition">Lacak Status</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script type="module" src="/js/lapor.js"></script>
+</body>
+</html>

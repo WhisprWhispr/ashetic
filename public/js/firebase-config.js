@@ -491,3 +491,295 @@ export async function updateWifiCredentials(queryId, wifiSSID, wifiPassword) {
 
   return { success: savedFirestore || savedServer };
 }
+
+// ========================================================
+// FITUR LAPOR GANGGUAN JARINGAN (CUSTOMER SUPPORT TICKETING)
+// ========================================================
+
+/**
+ * KIRIM LAPORAN KENDALA JARINGAN OLEH PELANGGAN
+ */
+export async function submitNetworkReport(reportData) {
+  const yy = new Date().getFullYear().toString().slice(-2);
+  const mm = (new Date().getMonth() + 1).toString().padStart(2, "0");
+  const rand = Math.floor(1000 + Math.random() * 9000);
+  const reportId = reportData.reportId || `ASH-LPR-${yy}${mm}-${rand}`;
+
+  const payload = {
+    reportId,
+    subscriptionId: reportData.subscriptionId || "-",
+    ticketId: reportData.ticketId || "-",
+    customerName: reportData.customerName || "Pelanggan Ashtatic",
+    phone: reportData.phone || "-",
+    category: reportData.category || "lainnya",
+    categoryLabel: reportData.categoryLabel || "Kendala Jaringan",
+    description: reportData.description || "Tidak ada deskripsi tambahan",
+    urgency: reportData.urgency || "sedang",
+    status: "menunggu", // menunggu | proses | selesai
+    technician: "",
+    adminNotes: "",
+    customSSID: reportData.customSSID || "",
+    customPassword: reportData.customPassword || "",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
+  let savedFirestore = false;
+  let savedServer = false;
+
+  // 1. Simpan ke Firestore
+  if (isFirestoreAvailable && db) {
+    try {
+      const docRef = doc(db, "network_reports", reportId);
+      await setDoc(docRef, payload);
+      savedFirestore = true;
+      console.log(`✅ Laporan kendala tersimpan di Firestore: ${reportId}`);
+    } catch (fsErr) {
+      console.warn("⚠️ Gagal simpan laporan ke Firestore:", fsErr.message);
+    }
+  }
+
+  // 2. Simpan ke Server Backend
+  try {
+    const res = await fetch("/api/reports/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.success) {
+      savedServer = true;
+      console.log(`✅ Laporan kendala tersinkron ke Server: ${reportId}`);
+    }
+  } catch (err) {
+    console.warn("⚠️ Gagal sinkron laporan ke server:", err);
+  }
+
+  return {
+    success: savedFirestore || savedServer,
+    reportId,
+    data: payload
+  };
+}
+
+/**
+ * AMBIL RIWAYAT LAPORAN BERDASARKAN ID LANGGANAN / NOMOR TIKET / NO LAPORAN
+ */
+export async function getReportsBySubscription(queryStr) {
+  const clean = (queryStr || "").trim().toUpperCase();
+  if (!clean) return { success: true, data: [] };
+
+  const results = [];
+  const seenIds = new Set();
+
+  // 1. Ambil dari Firestore
+  if (isFirestoreAvailable && db) {
+    try {
+      // Coba jika query adalah Report ID
+      const directRef = doc(db, "network_reports", clean);
+      const directSnap = await getDoc(directRef);
+      if (directSnap.exists()) {
+        const item = directSnap.data();
+        results.push(item);
+        seenIds.add(item.reportId);
+      }
+
+      // Query berdasarkan subscriptionId
+      const repCol = collection(db, "network_reports");
+      const qSub = query(repCol, where("subscriptionId", "==", clean));
+      const qSubSnap = await getDocs(qSub);
+      qSubSnap.forEach(d => {
+        const item = d.data();
+        if (!seenIds.has(item.reportId)) {
+          results.push(item);
+          seenIds.add(item.reportId);
+        }
+      });
+
+      // Query berdasarkan ticketId
+      const qTick = query(repCol, where("ticketId", "==", clean));
+      const qTickSnap = await getDocs(qTick);
+      qTickSnap.forEach(d => {
+        const item = d.data();
+        if (!seenIds.has(item.reportId)) {
+          results.push(item);
+          seenIds.add(item.reportId);
+        }
+      });
+
+      // Jika belum ada hasil, scan semua koleksi (untuk pencocokan partial atau phone)
+      if (results.length === 0) {
+        const allSnap = await getDocs(repCol);
+        allSnap.forEach(d => {
+          const item = d.data();
+          const repId = (item.reportId || "").toUpperCase();
+          const subId = (item.subscriptionId || "").toUpperCase();
+          const tId = (item.ticketId || "").toUpperCase();
+          const ph = (item.phone || "").replace(/[^0-9]/g, "");
+          const cleanQ = clean.replace(/[^0-9]/g, "");
+
+          if (
+            repId.includes(clean) ||
+            subId.includes(clean) ||
+            tId.includes(clean) ||
+            (cleanQ.length >= 8 && ph.includes(cleanQ))
+          ) {
+            if (!seenIds.has(item.reportId)) {
+              results.push(item);
+              seenIds.add(item.reportId);
+            }
+          }
+        });
+      }
+    } catch (fsErr) {
+      console.warn("⚠️ Gagal mengambil laporan dari Firestore:", fsErr.message);
+    }
+  }
+
+  // 2. Fallback / Tambahan dari Server API
+  try {
+    const res = await fetch(`/api/reports/${encodeURIComponent(clean)}`);
+    const sData = await res.json();
+    if (sData.success && Array.isArray(sData.data)) {
+      sData.data.forEach(item => {
+        if (!seenIds.has(item.reportId)) {
+          results.push(item);
+          seenIds.add(item.reportId);
+        }
+      });
+    }
+  } catch (err) {
+    console.warn("⚠️ Gagal ambil laporan dari server:", err);
+  }
+
+  // Urutkan laporan dari yang paling baru
+  results.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+  return {
+    success: true,
+    data: results
+  };
+}
+
+/**
+ * ADMIN: AMBIL SEMUA LAPORAN GANGGUAN
+ */
+export async function getAdminNetworkReports(adminToken = "") {
+  const reports = [];
+  const seenIds = new Set();
+
+  // 1. Coba Firestore
+  if (isFirestoreAvailable && db) {
+    try {
+      const repCol = collection(db, "network_reports");
+      const snap = await getDocs(repCol);
+      snap.forEach(d => {
+        const item = d.data();
+        reports.push(item);
+        seenIds.add(item.reportId);
+      });
+      console.log(`✅ Loaded ${reports.length} laporan dari Firestore.`);
+    } catch (fsErr) {
+      console.warn("⚠️ Gagal ambil laporan admin dari Firestore:", fsErr.message);
+    }
+  }
+
+  // 2. Ambil dari API Server
+  try {
+    const res = await fetch("/api/admin/reports", {
+      headers: { "Authorization": `Bearer ${adminToken}` }
+    });
+    const sData = await res.json();
+    if (sData.success && Array.isArray(sData.data)) {
+      sData.data.forEach(item => {
+        if (!seenIds.has(item.reportId)) {
+          reports.push(item);
+          seenIds.add(item.reportId);
+        }
+      });
+    }
+  } catch (err) {
+    console.warn("⚠️ Gagal ambil laporan admin dari server:", err);
+  }
+
+  // Urutkan dari yang terbaru
+  reports.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  return { success: true, data: reports };
+}
+
+/**
+ * ADMIN: UPDATE STATUS LAPORAN (Menunggu -> Proses -> Selesai)
+ */
+export async function updateReportStatus(reportId, status, technician = "", adminNotes = "", adminToken = "") {
+  let updatedFirestore = false;
+  let updatedServer = false;
+
+  const updatePayload = {
+    status,
+    technician,
+    adminNotes,
+    updatedAt: new Date().toISOString()
+  };
+
+  // 1. Firestore
+  if (isFirestoreAvailable && db) {
+    try {
+      const docRef = doc(db, "network_reports", reportId);
+      await updateDoc(docRef, updatePayload);
+      updatedFirestore = true;
+    } catch (fsErr) {
+      console.warn("⚠️ Gagal update status laporan di Firestore:", fsErr.message);
+    }
+  }
+
+  // 2. Server API
+  try {
+    const res = await fetch(`/api/admin/reports/${encodeURIComponent(reportId)}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${adminToken}`
+      },
+      body: JSON.stringify(updatePayload)
+    });
+    const sData = await res.json();
+    if (sData.success) updatedServer = true;
+  } catch (err) {
+    console.warn("⚠️ Gagal update status laporan di server:", err);
+  }
+
+  return { success: updatedFirestore || updatedServer };
+}
+
+/**
+ * ADMIN: HAPUS LAPORAN PERMANEN
+ */
+export async function deleteReportPermanently(reportId, adminToken = "") {
+  let deletedFirestore = false;
+  let deletedServer = false;
+
+  // 1. Firestore
+  if (isFirestoreAvailable && db) {
+    try {
+      const docRef = doc(db, "network_reports", reportId);
+      await deleteDoc(docRef);
+      deletedFirestore = true;
+    } catch (fsErr) {
+      console.warn("⚠️ Gagal hapus laporan di Firestore:", fsErr.message);
+    }
+  }
+
+  // 2. Server
+  try {
+    const res = await fetch(`/api/admin/reports/${encodeURIComponent(reportId)}`, {
+      method: "DELETE",
+      headers: { "Authorization": `Bearer ${adminToken}` }
+    });
+    const sData = await res.json();
+    if (sData.success) deletedServer = true;
+  } catch (err) {
+    console.warn("⚠️ Gagal hapus laporan di server:", err);
+  }
+
+  return { success: deletedFirestore || deletedServer };
+}

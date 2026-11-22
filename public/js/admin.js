@@ -1,5 +1,13 @@
 // Ashtatic Internet Solution - Admin Dashboard Script
-import { getAdminRegistrations, updateRegistrationStatus, deleteRegistrationPermanently, saveWifiDevices } from "./firebase-config.js";
+import { 
+  getAdminRegistrations, 
+  updateRegistrationStatus, 
+  deleteRegistrationPermanently, 
+  saveWifiDevices,
+  getAdminNetworkReports,
+  updateReportStatus,
+  deleteReportPermanently
+} from "./firebase-config.js";
 import { showToast, showCustomConfirm } from "./toast.js";
 
 let adminRegistrations = [];
@@ -8,6 +16,12 @@ let currentSearch = "";
 let selectedTicketForModal = null;
 let activeAdminWifiTicket = null;
 let activeAdminWifiDevices = [];
+
+// State untuk Laporan Gangguan
+let adminNetworkReports = [];
+let currentReportFilter = "all";
+let currentReportSearch = "";
+let selectedReportForModal = null;
 
 const ADMIN_PASS_KEY = "ashtatic_admin_token";
 const DEFAULT_PIN = "ashtatic2026";
@@ -20,6 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupExport();
   setupManualAdd();
   setupAdminWifiModalEvents();
+  setupAdminReportsEvents();
 });
 
 // Autentikasi Admin Sederhana & Aman
@@ -73,6 +88,7 @@ function setupAdminAuth() {
     if (loginModal) loginModal.classList.add("hidden");
     if (adminMain) adminMain.classList.remove("hidden");
     loadRegistrations();
+    loadAdminReports();
   }
 }
 
@@ -86,6 +102,7 @@ async function loadRegistrations() {
     adminRegistrations = await getAdminRegistrations(token);
     renderMetrics(adminRegistrations);
     renderTable();
+    loadAdminReports();
   } catch (err) {
     console.error("Gagal memuat pendaftaran:", err);
     showToast("Gagal memuat data pendaftaran dari database.", "error");
@@ -1101,4 +1118,317 @@ function generateMockMAC() {
     if (i < 5) mac += ":";
   }
   return mac;
+}
+
+// ========================================================
+// PENGELOLAAN LAPORAN GANGGUAN JARINGAN (ADMIN)
+// ========================================================
+
+function setupAdminReportsEvents() {
+  const btnOpenModal = document.getElementById("btnOpenReportsModal");
+  const modal = document.getElementById("adminReportsModal");
+  const btnClose = document.getElementById("btnCloseReportsModal");
+  const btnRefresh = document.getElementById("btnRefreshAdminReports");
+  const searchInput = document.getElementById("repSearchInput");
+  const filterTabs = document.querySelectorAll(".rep-filter-tab");
+
+  // Buka Modal Laporan
+  if (btnOpenModal && modal) {
+    btnOpenModal.addEventListener("click", () => {
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+      loadAdminReports();
+    });
+  }
+
+  // Tutup Modal Laporan
+  if (btnClose && modal) {
+    btnClose.addEventListener("click", () => {
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    });
+  }
+
+  // Refresh Laporan
+  if (btnRefresh) {
+    btnRefresh.addEventListener("click", () => {
+      loadAdminReports();
+      showToast("Data laporan gangguan disegarkan.", "info", 1500);
+    });
+  }
+
+  // Filter Tabs Laporan
+  filterTabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      filterTabs.forEach(t => {
+        t.className = "rep-filter-tab px-3 py-1.5 rounded-lg text-slate-400 hover:text-white whitespace-nowrap transition";
+      });
+      tab.className = "rep-filter-tab px-3 py-1.5 rounded-lg bg-rose-500 text-black font-bold whitespace-nowrap transition";
+      currentReportFilter = tab.getAttribute("data-rep-filter") || "all";
+      renderAdminReportsTable();
+    });
+  });
+
+  // Search Laporan
+  if (searchInput) {
+    searchInput.addEventListener("input", (e) => {
+      currentReportSearch = e.target.value.toLowerCase().trim();
+      renderAdminReportsTable();
+    });
+  }
+
+  // Sub-modal Edit Status Laporan
+  const editModal = document.getElementById("editReportStatusModal");
+  const btnCloseEdit = document.getElementById("btnCloseEditReportModal");
+  const btnCancelEdit = document.getElementById("btnCancelEditReport");
+  const editForm = document.getElementById("editReportForm");
+
+  if (btnCloseEdit && editModal) {
+    btnCloseEdit.onclick = () => editModal.classList.add("hidden");
+  }
+  if (btnCancelEdit && editModal) {
+    btnCancelEdit.onclick = () => editModal.classList.add("hidden");
+  }
+
+  if (editForm) {
+    editForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!selectedReportForModal) return;
+
+      const status = document.getElementById("editRepStatus").value;
+      const technician = document.getElementById("editRepTechnician").value.trim();
+      const adminNotes = document.getElementById("editRepNotes").value.trim();
+      const token = sessionStorage.getItem(ADMIN_PASS_KEY) || DEFAULT_PIN;
+
+      const submitBtn = editForm.querySelector("button[type='submit']");
+      const origText = submitBtn.innerHTML;
+      submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Menyimpan...`;
+      submitBtn.disabled = true;
+
+      try {
+        const res = await updateReportStatus(selectedReportForModal.reportId, status, technician, adminNotes, token);
+        if (res.success) {
+          // Update state lokal
+          selectedReportForModal.status = status;
+          selectedReportForModal.technician = technician;
+          selectedReportForModal.adminNotes = adminNotes;
+          selectedReportForModal.updatedAt = new Date().toISOString();
+
+          editModal.classList.add("hidden");
+          renderAdminReportsTable();
+          updateReportBadgeCounter();
+          showToast(`Status laporan ${selectedReportForModal.reportId} diperbarui!`, "success");
+        } else {
+          showToast("Gagal memperbarui status laporan.", "error");
+        }
+      } catch (err) {
+        console.error("Gagal simpan status laporan:", err);
+        showToast("Terjadi kendala saat update status laporan.", "error");
+      } finally {
+        submitBtn.innerHTML = origText;
+        submitBtn.disabled = false;
+      }
+    });
+  }
+}
+
+// Muat Semua Laporan Gangguan dari Firebase / Server
+async function loadAdminReports() {
+  const token = sessionStorage.getItem(ADMIN_PASS_KEY) || DEFAULT_PIN;
+  try {
+    const res = await getAdminNetworkReports(token);
+    if (res.success && Array.isArray(res.data)) {
+      adminNetworkReports = res.data;
+      updateReportBadgeCounter();
+      renderAdminReportsTable();
+    }
+  } catch (err) {
+    console.warn("Gagal load admin reports:", err);
+  }
+}
+
+// Update Badge Counter di Header Navbar
+function updateReportBadgeCounter() {
+  const badge = document.getElementById("adminReportBadgeCount");
+  const totalCountElem = document.getElementById("modalReportTotalCount");
+
+  const waitingCount = adminNetworkReports.filter(r => r.status === "menunggu").length;
+
+  if (badge) {
+    if (waitingCount > 0) {
+      badge.innerText = waitingCount;
+      badge.classList.remove("hidden");
+    } else {
+      badge.classList.add("hidden");
+    }
+  }
+
+  if (totalCountElem) {
+    totalCountElem.innerText = `${adminNetworkReports.length} Laporan`;
+  }
+}
+
+// Render Tabel Laporan Gangguan
+function renderAdminReportsTable() {
+  const tbody = document.getElementById("adminReportsTableBody");
+  const emptyState = document.getElementById("adminReportsEmpty");
+  if (!tbody) return;
+
+  let filtered = adminNetworkReports;
+
+  // Filter Kategori Status
+  if (currentReportFilter !== "all") {
+    filtered = filtered.filter(r => r.status === currentReportFilter);
+  }
+
+  // Filter Pencarian
+  if (currentReportSearch) {
+    filtered = filtered.filter(r => {
+      const repId = (r.reportId || "").toLowerCase();
+      const subId = (r.subscriptionId || "").toLowerCase();
+      const name = (r.customerName || "").toLowerCase();
+      const ph = (r.phone || "").toLowerCase();
+      const cat = (r.categoryLabel || r.category || "").toLowerCase();
+      return repId.includes(currentReportSearch) || 
+             subId.includes(currentReportSearch) || 
+             name.includes(currentReportSearch) || 
+             ph.includes(currentReportSearch) || 
+             cat.includes(currentReportSearch);
+    });
+  }
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = "";
+    if (emptyState) emptyState.classList.remove("hidden");
+    return;
+  }
+
+  if (emptyState) emptyState.classList.add("hidden");
+
+  let html = "";
+  filtered.forEach(item => {
+    // Badge Status
+    let statusBadge = "";
+    if (item.status === "selesai") {
+      statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950/90 text-emerald-300 border border-emerald-400/50 flex items-center gap-1 w-fit"><i class="fa-solid fa-circle-check"></i> Selesai</span>`;
+    } else if (item.status === "proses") {
+      statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-950/90 text-cyan-300 border border-cyan-400/50 flex items-center gap-1 w-fit"><i class="fa-solid fa-screwdriver-wrench"></i> Ditangani</span>`;
+    } else {
+      statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-950/90 text-amber-300 border border-amber-400/50 flex items-center gap-1 w-fit"><i class="fa-solid fa-clock"></i> Menunggu</span>`;
+    }
+
+    // Urgency Badge
+    let urgBadge = "";
+    if (item.urgency === "mendesak") {
+      urgBadge = `<span class="text-[10px] text-rose-400 font-bold bg-rose-950/60 border border-rose-500/30 px-1.5 py-0.2 rounded">🔴 Mendesak</span>`;
+    } else if (item.urgency === "sedang") {
+      urgBadge = `<span class="text-[10px] text-amber-300 font-bold bg-amber-950/60 border border-amber-500/30 px-1.5 py-0.2 rounded">🟡 Sedang</span>`;
+    } else {
+      urgBadge = `<span class="text-[10px] text-emerald-300 font-bold bg-emerald-950/60 border border-emerald-500/30 px-1.5 py-0.2 rounded">🟢 Standar</span>`;
+    }
+
+    const cleanPhone = (item.phone || "").replace(/[^0-9]/g, "");
+    const waPhone = cleanPhone.startsWith("0") ? "62" + cleanPhone.slice(1) : cleanPhone;
+    const waText = encodeURIComponent(
+      `Halo Bapak/Ibu ${item.customerName},\n` +
+      `Kami dari Tim Support Ashtatic Internet Solution menindaklanjuti laporan kendala #${item.reportId}.\n` +
+      `Kategori: ${item.categoryLabel || item.category}\n` +
+      `Status: ${item.status === 'proses' ? 'Sedang kami tangani' : item.status === 'selesai' ? 'Sudah normal & selesai' : 'Akan segera ditangani'}.\n` +
+      `Apakah saat ini kendala sudah membaik?`
+    );
+
+    const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : "-";
+
+    html += `
+      <tr class="hover:bg-slate-900/50 transition">
+        <td class="px-3.5 py-3 whitespace-nowrap font-mono font-bold text-rose-300">
+          <div>${item.reportId}</div>
+          <span class="text-[10px] text-slate-500 font-normal">${dateStr}</span>
+        </td>
+        <td class="px-3.5 py-3">
+          <div class="font-bold text-white text-xs">${item.customerName}</div>
+          <div class="text-[11px] font-mono text-cyan-300">${item.subscriptionId}</div>
+          <a href="https://wa.me/${waPhone}?text=${waText}" target="_blank" class="text-[10px] text-emerald-400 hover:underline flex items-center gap-1 mt-0.5">
+            <i class="fa-brands fa-whatsapp"></i> ${item.phone}
+          </a>
+        </td>
+        <td class="px-3.5 py-3">
+          <div class="font-semibold text-white text-xs">${item.categoryLabel || item.category}</div>
+          <div class="mt-1">${urgBadge}</div>
+        </td>
+        <td class="px-3.5 py-3 max-w-xs">
+          <p class="text-slate-300 text-xs italic line-clamp-2">"${item.description || '-'}"</p>
+          ${item.customSSID || item.customPassword ? `
+            <div class="text-[10px] font-mono text-purple-300 mt-1 bg-purple-950/40 p-1.5 rounded border border-purple-500/30">
+              WiFi Baru: <strong>${item.customSSID}</strong> / Sandi: <strong>${item.customPassword}</strong>
+            </div>
+          ` : ''}
+        </td>
+        <td class="px-3.5 py-3 whitespace-nowrap">
+          ${statusBadge}
+          <div class="text-[11px] text-slate-400 mt-1">
+            <i class="fa-solid fa-user-gear text-[10px] text-slate-500"></i> ${item.technician || 'Belum ditugaskan'}
+          </div>
+        </td>
+        <td class="px-3.5 py-3 whitespace-nowrap text-right">
+          <div class="flex items-center justify-end gap-1.5">
+            <button type="button" class="btn-edit-rep-status p-1.5 px-2 rounded-lg bg-cyan-950/60 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 text-xs font-semibold" data-id="${item.reportId}" title="Ubah Status & Teknisi">
+              <i class="fa-solid fa-pen-to-square"></i> Status
+            </button>
+            <a href="https://wa.me/${waPhone}?text=${waText}" target="_blank" class="p-1.5 px-2 rounded-lg bg-emerald-950/60 hover:bg-emerald-900 border border-emerald-500/40 text-emerald-400 text-xs" title="Chat WhatsApp Pelanggan">
+              <i class="fa-brands fa-whatsapp"></i>
+            </a>
+            <button type="button" class="btn-delete-rep p-1.5 px-2 rounded-lg bg-red-950/40 hover:bg-red-900 border border-red-500/30 text-red-400 text-xs" data-id="${item.reportId}" title="Hapus Laporan">
+              <i class="fa-regular fa-trash-can"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  });
+
+  tbody.innerHTML = html;
+
+  // Pasang Listener Ubah Status
+  tbody.querySelectorAll(".btn-edit-rep-status").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const repId = btn.getAttribute("data-id");
+      const item = adminNetworkReports.find(r => r.reportId === repId);
+      if (item) showEditReportModal(item);
+    });
+  });
+
+  // Pasang Listener Hapus Laporan
+  tbody.querySelectorAll(".btn-delete-rep").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const repId = btn.getAttribute("data-id");
+      showCustomConfirm(`Apakah Anda yakin ingin menghapus tiket laporan "${repId}" secara permanen?`, async () => {
+        const token = sessionStorage.getItem(ADMIN_PASS_KEY) || DEFAULT_PIN;
+        const res = await deleteReportPermanently(repId, token);
+        if (res.success) {
+          adminNetworkReports = adminNetworkReports.filter(r => r.reportId !== repId);
+          renderAdminReportsTable();
+          updateReportBadgeCounter();
+          showToast(`Laporan ${repId} berhasil dihapus.`, "success");
+        } else {
+          showToast("Gagal menghapus laporan.", "error");
+        }
+      });
+    });
+  });
+}
+
+// Buka Modal Edit Status Laporan
+function showEditReportModal(item) {
+  selectedReportForModal = item;
+  const editModal = document.getElementById("editReportStatusModal");
+  if (!editModal) return;
+
+  document.getElementById("editRepModalId").innerText = item.reportId;
+  document.getElementById("editRepStatus").value = item.status || "menunggu";
+  document.getElementById("editRepTechnician").value = item.technician || "";
+  document.getElementById("editRepNotes").value = item.adminNotes || "";
+
+  editModal.classList.remove("hidden");
+  editModal.classList.add("flex");
 }

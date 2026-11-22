@@ -14,6 +14,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const ADMIN_PIN = process.env.ADMIN_PIN || "ashtatic2026";
 const DATA_FILE = path.join(__dirname, "data", "registrations.json");
+const REPORTS_FILE = path.join(__dirname, "data", "reports.json");
 
 // Middlewares
 app.use(cors());
@@ -45,6 +46,32 @@ async function saveRegistrations(data) {
     return true;
   } catch (err) {
     console.error("Error saving registrations:", err);
+    return false;
+  }
+}
+
+// Helper: Membaca data laporan gangguan dari file JSON
+async function readReports() {
+  try {
+    const raw = await fs.readFile(REPORTS_FILE, "utf-8");
+    return JSON.parse(raw);
+  } catch (err) {
+    if (err.code === "ENOENT") {
+      await fs.writeFile(REPORTS_FILE, JSON.stringify([], null, 2));
+      return [];
+    }
+    console.error("Error reading reports:", err);
+    return [];
+  }
+}
+
+// Helper: Menyimpan data laporan gangguan ke file JSON
+async function saveReports(data) {
+  try {
+    await fs.writeFile(REPORTS_FILE, JSON.stringify(data, null, 2), "utf-8");
+    return true;
+  } catch (err) {
+    console.error("Error saving reports:", err);
     return false;
   }
 }
@@ -473,6 +500,168 @@ app.get("/api/stats", async (req, res) => {
   }
 });
 
+// ========================================================
+// API ROUTES UNTUK LAPOR GANGGUAN JARINGAN
+// ========================================================
+
+// 1. Submit Laporan Baru (POST /api/reports/submit)
+app.post("/api/reports/submit", async (req, res) => {
+  try {
+    const {
+      subscriptionId,
+      ticketId,
+      customerName,
+      phone,
+      category,
+      categoryLabel,
+      description,
+      urgency,
+      customSSID,
+      customPassword
+    } = req.body;
+
+    if (!phone || !category) {
+      return res.status(400).json({
+        success: false,
+        message: "Nomor WhatsApp dan Kategori Gangguan wajib diisi."
+      });
+    }
+
+    const yy = new Date().getFullYear().toString().slice(-2);
+    const mm = (new Date().getMonth() + 1).toString().padStart(2, "0");
+    const rand = Math.floor(1000 + Math.random() * 9000);
+    const reportId = `ASH-LPR-${yy}${mm}-${rand}`;
+
+    const newReport = {
+      reportId,
+      subscriptionId: subscriptionId || "-",
+      ticketId: ticketId || "-",
+      customerName: customerName || "Pelanggan Ashtatic",
+      phone: phone || "-",
+      category: category || "lainnya",
+      categoryLabel: categoryLabel || "Kendala Jaringan",
+      description: description || "Tidak ada rincian tambahan",
+      urgency: urgency || "sedang",
+      status: "menunggu", // menunggu | proses | selesai
+      technician: "",
+      adminNotes: "",
+      customSSID: customSSID || "",
+      customPassword: customPassword || "",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    const reports = await readReports();
+    reports.unshift(newReport);
+    await saveReports(reports);
+
+    return res.status(201).json({
+      success: true,
+      message: "Laporan gangguan berhasil dibuat dan diteruskan ke teknisi.",
+      reportId,
+      data: newReport
+    });
+  } catch (err) {
+    console.error("API submit report error:", err);
+    return res.status(500).json({ success: false, message: "Terjadi kesalahan pada server saat memproses laporan." });
+  }
+});
+
+// 2. Cari Laporan Berdasarkan ID Langganan / No Tiket / No Laporan (GET /api/reports/:query)
+app.get("/api/reports/:query", async (req, res) => {
+  try {
+    const query = req.params.query.trim().toUpperCase();
+    const reports = await readReports();
+
+    const matches = reports.filter(r => {
+      const repId = (r.reportId || "").toUpperCase();
+      const subId = (r.subscriptionId || "").toUpperCase();
+      const tId = (r.ticketId || "").toUpperCase();
+      const ph = (r.phone || "").replace(/[^0-9]/g, "");
+      const cleanQ = query.replace(/[^0-9]/g, "");
+
+      return (
+        repId === query ||
+        subId === query ||
+        tId === query ||
+        (cleanQ.length >= 8 && ph.includes(cleanQ))
+      );
+    });
+
+    return res.json({
+      success: true,
+      data: matches
+    });
+  } catch (err) {
+    console.error("API get reports error:", err);
+    return res.status(500).json({ success: false, message: "Gagal mengambil data laporan." });
+  }
+});
+
+// 3. Admin: Ambil Semua Laporan Gangguan (GET /api/admin/reports)
+app.get("/api/admin/reports", verifyAdmin, async (req, res) => {
+  try {
+    const reports = await readReports();
+    return res.json({
+      success: true,
+      data: reports
+    });
+  } catch (err) {
+    console.error("API admin get reports error:", err);
+    return res.status(500).json({ success: false, message: "Gagal memuat laporan admin." });
+  }
+});
+
+// 4. Admin: Update Status Laporan Gangguan (PUT /api/admin/reports/:reportId)
+app.put("/api/admin/reports/:reportId", verifyAdmin, async (req, res) => {
+  try {
+    const { reportId } = req.params;
+    const { status, technician, adminNotes } = req.body;
+
+    const reports = await readReports();
+    const idx = reports.findIndex(r => r.reportId === reportId);
+    if (idx === -1) {
+      return res.status(404).json({ success: false, message: "Laporan tidak ditemukan." });
+    }
+
+    if (status) reports[idx].status = status;
+    if (technician !== undefined) reports[idx].technician = technician;
+    if (adminNotes !== undefined) reports[idx].adminNotes = adminNotes;
+    reports[idx].updatedAt = new Date().toISOString();
+
+    await saveReports(reports);
+
+    return res.json({
+      success: true,
+      message: "Status laporan berhasil diperbarui.",
+      data: reports[idx]
+    });
+  } catch (err) {
+    console.error("API update report error:", err);
+    return res.status(500).json({ success: false, message: "Gagal memperbarui status laporan." });
+  }
+});
+
+// 5. Admin: Hapus Laporan Gangguan (DELETE /api/admin/reports/:reportId)
+app.delete("/api/admin/reports/:reportId", verifyAdmin, async (req, res) => {
+  try {
+    const { reportId } = req.params;
+    let reports = await readReports();
+    const initialLen = reports.length;
+    reports = reports.filter(r => r.reportId !== reportId);
+
+    if (reports.length === initialLen) {
+      return res.status(404).json({ success: false, message: "Laporan tidak ditemukan." });
+    }
+
+    await saveReports(reports);
+    return res.json({ success: true, message: "Laporan gangguan berhasil dihapus." });
+  } catch (err) {
+    console.error("API delete report error:", err);
+    return res.status(500).json({ success: false, message: "Gagal menghapus laporan." });
+  }
+});
+
 // Clean Page Routes
 app.get("/tracking", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "tracking.html"));
@@ -484,6 +673,10 @@ app.get("/admin", (req, res) => {
 
 app.get(["/wifi", "/wifi-manager"], (req, res) => {
   res.sendFile(path.join(__dirname, "public", "wifi.html"));
+});
+
+app.get(["/lapor", "/lapor-jaringan"], (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "lapor.html"));
 });
 
 // Catch-all route to index.html for SPA-friendly behavior

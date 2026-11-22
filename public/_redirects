@@ -2,4 +2,6 @@
 /admin           /admin.html       200
 /wifi-manager    /wifi.html        200
 /wifi            /wifi.html        200
+/lapor-jaringan  /lapor.html       200
+/lapor           /lapor.html       200
 /beranda         /index.html       200

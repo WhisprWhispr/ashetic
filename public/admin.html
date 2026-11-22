@@ -62,6 +62,11 @@
 
         <!-- Admin Actions -->
         <div class="flex items-center gap-2">
+          <button id="btnOpenReportsModal" class="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-rose-950/80 border border-rose-500/40 text-rose-300 hover:text-white text-xs font-bold flex items-center gap-1.5 transition relative" title="Daftar Tiket Laporan Gangguan Pelanggan">
+            <i class="fa-solid fa-triangle-exclamation text-rose-400 text-xs"></i> 
+            <span class="hidden sm:inline">Laporan Gangguan</span>
+            <span id="adminReportBadgeCount" class="hidden px-1.5 py-0.5 rounded-full bg-rose-500 text-black font-black text-[10px] leading-none">0</span>
+          </button>
           <button id="btnOpenGlobalWifiModal" class="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-indigo-950/80 border border-indigo-500/40 text-indigo-300 hover:text-white text-xs font-bold flex items-center gap-1.5 transition" title="Kelola Pengguna WiFi Pelanggan">
             <i class="fa-solid fa-users-gear text-indigo-400 text-xs"></i> <span class="hidden sm:inline">Pengguna WiFi</span>
           </button>
@@ -555,6 +560,124 @@
           <i class="fa-solid fa-cloud-arrow-up"></i> Simpan ke Database
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL LAPORAN GANGGUAN JARINGAN (ADMIN) -->
+  <!-- ======================================================== -->
+  <div id="adminReportsModal" class="hidden fixed inset-0 z-50 items-center justify-center p-3 sm:p-4 modal-backdrop overflow-y-auto">
+    <div class="w-full max-w-5xl bg-[#091129] border border-rose-500/50 rounded-2xl sm:rounded-3xl p-5 sm:p-7 space-y-4 my-auto max-h-[94vh] overflow-y-auto">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 text-lg">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] uppercase font-bold text-rose-400 tracking-wider">TIKET LAPORAN GANGGUAN</span>
+              <span id="modalReportTotalCount" class="text-xs px-2 py-0.2 rounded-full bg-rose-950 text-rose-300 border border-rose-500/40 font-bold">0 Laporan</span>
+            </div>
+            <h3 class="text-lg sm:text-xl font-black text-white">Kelola Kendala &amp; Layanan Pelanggan</h3>
+          </div>
+        </div>
+        <button id="btnCloseReportsModal" class="text-slate-400 hover:text-white text-xl p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Filter Tabs & Search -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-semibold scrollbar-none" id="reportFilterTabs">
+          <button class="rep-filter-tab px-3 py-1.5 rounded-lg bg-rose-500 text-black font-bold whitespace-nowrap transition" data-rep-filter="all">Semua</button>
+          <button class="rep-filter-tab px-3 py-1.5 rounded-lg text-slate-400 hover:text-white whitespace-nowrap transition" data-rep-filter="menunggu">Menunggu</button>
+          <button class="rep-filter-tab px-3 py-1.5 rounded-lg text-slate-400 hover:text-white whitespace-nowrap transition" data-rep-filter="proses">Ditangani</button>
+          <button class="rep-filter-tab px-3 py-1.5 rounded-lg text-slate-400 hover:text-white whitespace-nowrap transition" data-rep-filter="selesai">Selesai</button>
+        </div>
+
+        <div class="relative w-full sm:w-64">
+          <input type="text" id="repSearchInput" placeholder="Cari No. Laporan / ID / Nama..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-rose-400">
+          <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-500 text-xs"></i>
+        </div>
+      </div>
+
+      <!-- Table Container -->
+      <div class="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/80 max-h-96 overflow-y-auto">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-900/90 text-[10px] uppercase tracking-wider text-slate-400 border-b border-slate-800 sticky top-0 z-10">
+            <tr>
+              <th class="px-3.5 py-2.5">No. Tiket</th>
+              <th class="px-3.5 py-2.5">Pelanggan</th>
+              <th class="px-3.5 py-2.5">Kategori &amp; Urgensi</th>
+              <th class="px-3.5 py-2.5">Rincian Gangguan</th>
+              <th class="px-3.5 py-2.5">Status &amp; Teknisi</th>
+              <th class="px-3.5 py-2.5 text-right">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="adminReportsTableBody" class="divide-y divide-slate-800/60">
+            <!-- Injected by JavaScript -->
+          </tbody>
+        </table>
+        <div id="adminReportsEmpty" class="hidden py-8 text-center text-slate-500 text-xs">
+          Tidak ada data laporan gangguan ditemukan.
+        </div>
+      </div>
+
+      <!-- Footer Action -->
+      <div class="flex items-center justify-between pt-2 border-t border-slate-800 text-xs">
+        <span class="text-slate-400">Status laporan otomatis tersinkron ke pelanggan dan database Firestore.</span>
+        <button type="button" id="btnRefreshAdminReports" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:text-white flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-rotate"></i> Muat Ulang
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL EDIT STATUS LAPORAN (SUB-MODAL) -->
+  <div id="editReportStatusModal" class="hidden fixed inset-0 z-50 items-center justify-center p-3 modal-backdrop">
+    <div class="w-full max-w-md bg-[#091129] border border-rose-500/60 rounded-2xl p-5 space-y-4 my-auto shadow-2xl">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+        <div>
+          <span class="text-[10px] uppercase font-bold text-slate-400">UPDATE STATUS PENANGANAN</span>
+          <h4 id="editRepModalId" class="text-base font-black text-rose-400 font-mono">-</h4>
+        </div>
+        <button id="btnCloseEditReportModal" class="text-slate-400 hover:text-white text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="editReportForm" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">Status Penanganan</label>
+          <select id="editRepStatus" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white">
+            <option value="menunggu">🟡 Menunggu Penanganan</option>
+            <option value="proses">🔵 Sedang Ditangani Teknisi</option>
+            <option value="selesai">🟢 Selesai / Internet Normal</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">Nama Petugas Teknisi</label>
+          <input type="text" id="editRepTechnician" placeholder="Contoh: Dedek / Tim Jaringan 1" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">Catatan Tindak Lanjut / Solusi</label>
+          <textarea id="editRepNotes" rows="3" placeholder="Contoh: Penggantian adaptor router selesai, redaman sinyal normal..." class="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" id="btnCancelEditReport" class="px-3.5 py-2 rounded-xl bg-slate-800 text-slate-300 font-semibold">Batal</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold flex items-center gap-1.5 shadow-lg">
+            <i class="fa-solid fa-floppy-disk"></i> Simpan Status
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
     </div>
   </div>
 

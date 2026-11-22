@@ -5,7 +5,7 @@ rules_version = '2';
  * FIRESTORE SECURITY RULES - ASHTATIC INTERNET SOLUTION
  * Project ID   : ashetic-93d32
  * Storage Bucket: ashetic-93d32.firebasestorage.app
- * Terakhir Diperbarui : 22 November 2026
+ * Terakhir Diperbarui : 22 November 2026 (Fitur Lapor Gangguan Jaringan)
  * ==============================================================================
  * Aturan keamanan Cloud Firestore untuk:
  * 1. Pendaftaran Pasang Baru (Formulir Publik)
@@ -13,8 +13,9 @@ rules_version = '2';
  * 3. Pengaturan Nama WiFi (SSID) & Kata Sandi (Password) oleh Pelanggan
  * 4. Pemantauan & Blokir Perangkat Pengguna WiFi (wifiDevices) via ID Langganan
  * 5. Input & Pengelolaan Daftar Pengguna WiFi Pelanggan oleh Admin
- * 6. Pengelolaan Status & Penugasan Teknisi oleh Admin
- * 7. Hapus Data Permanen dari Database oleh Admin
+ * 6. Lapor Gangguan Jaringan (Kendala Internet, Lemot, Putus, Ganti Sandi)
+ * 7. Pengelolaan Status Laporan & Penugasan Teknisi oleh Admin
+ * 8. Hapus Data Permanen dari Database oleh Admin
  *
  * CARA MEMASANG RULES INI DI FIREBASE CONSOLE:
  * 1. Buka https://console.firebase.google.com/
@@ -35,10 +36,6 @@ service cloud.firestore {
     match /registrations/{ticketId} {
 
       // A. CREATE (Pendaftaran Baru dari Pengunjung):
-      //    - Wajib menyertakan field data pokok
-      //    - Nama lengkap minimal 3 karakter
-      //    - Nomor telepon / WA minimal 9 digit
-      //    - Status awal HARUS 'menunggu_verifikasi' atau 'pending'
       allow create: if request.resource.data.keys().hasAll([
                         'ticketId', 'fullName', 'phone', 'email', 'packageId', 
                         'address', 'status', 'createdAt'
@@ -50,22 +47,12 @@ service cloud.firestore {
                       && request.resource.data.status in ['menunggu_verifikasi', 'pending'];
 
       // B. READ (Lacak Status, Cek Pengguna WiFi, & Pencarian Admin):
-      //    - GET: Pelanggan melacak via Nomor Tiket (ASH-YYMM-XXXX) atau ID Langganan
-      //    - LIST: Pelanggan mencari via Nomor WhatsApp atau Admin memuat data pendaftaran
       allow read: if true;
 
-      // C. UPDATE:
-      //    - Pelanggan mengubah Nama WiFi (wifiSSID) & Kata Sandi (wifiPassword)
-      //    - Pelanggan memutus/memblokir perangkat asing pada daftar wifiDevices
-      //    - Admin menginput/mengelola daftar pengguna WiFi (wifiDevices)
-      //    - Admin memperbarui status pemasangan:
-      //      ['menunggu_verifikasi', 'terverifikasi', 'survey', 'jadwal_teknisi', 'pemasangan', 'selesai', 'aktif', 'ditolak']
-      //    - Admin menginput nama teknisi bertugas dan catatan progres
+      // C. UPDATE (Update Status, SSID/Password, & Perangkat Terhubung):
       allow update: if true;
 
       // D. DELETE (Hapus Permanen):
-      //    - Memungkinkan tombol "Hapus Permanen" pada Panel Admin berfungsi
-      //      tanpa error permission-denied
       allow delete: if true;
 
       // Sub-koleksi untuk perangkat terhubung jika router melakukan sync terpisah
@@ -75,7 +62,26 @@ service cloud.firestore {
     }
 
     // ==========================================================================
-    // 2. KOLEKSI: stats & settings (Data Agregasi Metrik & Pengaturan Website)
+    // 2. KOLEKSI: network_reports (Tiket Laporan Gangguan & Kendala Jaringan)
+    // ==========================================================================
+    match /network_reports/{reportId} {
+      // Pelanggan membuat tiket laporan kendala (mati, ngeleg, ganti wifi, dll)
+      allow create: if request.resource.data.keys().hasAll([
+                        'reportId', 'subscriptionId', 'category', 'phone', 'createdAt'
+                      ]);
+
+      // Pelanggan melacak status laporannya & Admin melihat semua laporan masuk
+      allow read: if true;
+
+      // Admin mengupdate status penanganan, teknisi, dan solusi kendala
+      allow update: if true;
+
+      // Admin menghapus laporan
+      allow delete: if true;
+    }
+
+    // ==========================================================================
+    // 3. KOLEKSI: stats, settings, & wifi_devices (Pengaturan & Metrik)
     // ==========================================================================
     match /stats/{docId} {
       allow read, write: if true;
@@ -90,7 +96,7 @@ service cloud.firestore {
     }
 
     // ==========================================================================
-    // 3. KOLEKSI LAINNYA: Default ditutup untuk keamanan
+    // 4. KOLEKSI LAINNYA: Default ditutup untuk keamanan
     // ==========================================================================
     match /{document=**} {
       allow read, write: if request.auth != null;
