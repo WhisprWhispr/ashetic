@@ -5,21 +5,23 @@ rules_version = '2';
  * FIRESTORE SECURITY RULES - ASHTATIC INTERNET SOLUTION
  * Project ID   : ashetic-93d32
  * Storage Bucket: ashetic-93d32.firebasestorage.app
- * Terakhir Diperbarui : 21 November 2026
+ * Terakhir Diperbarui : 22 November 2026
  * ==============================================================================
  * Aturan keamanan Cloud Firestore untuk:
  * 1. Pendaftaran Pasang Baru (Formulir Publik)
  * 2. Lacak Status Tiket & Cari via Nomor HP (Tracking Publik)
- * 3. Pengaturan Nama WiFi (SSID) & Kata Sandi (Password) oleh Pelanggan Terverifikasi
- * 4. Pengelolaan Status & Penugasan Teknisi oleh Admin
- * 5. Hapus Data Permanen dari Database oleh Admin
+ * 3. Pengaturan Nama WiFi (SSID) & Kata Sandi (Password) oleh Pelanggan
+ * 4. Pemantauan & Blokir Perangkat Pengguna WiFi (wifiDevices) via ID Langganan
+ * 5. Input & Pengelolaan Daftar Pengguna WiFi Pelanggan oleh Admin
+ * 6. Pengelolaan Status & Penugasan Teknisi oleh Admin
+ * 7. Hapus Data Permanen dari Database oleh Admin
  *
  * CARA MEMASANG RULES INI DI FIREBASE CONSOLE:
  * 1. Buka https://console.firebase.google.com/
  * 2. Masuk ke project "ashetic-93d32"
  * 3. Di menu sebelah kiri, klik "Firestore Database"
  * 4. Klik tab "Rules" di bagian atas
- * 5. Ganti seluruh isi rules dengan kode di bawah ini
+ * 5. Hapus rules yang lama, lalu Paste seluruh isi kode ini
  * 6. Klik tombol "Publish" (Publikasikan)
  * ==============================================================================
  */
@@ -28,7 +30,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // ==========================================================================
-    // 1. KOLEKSI: registrations (Pendaftaran Pasang Baru & Tracking Status)
+    // 1. KOLEKSI: registrations (Data Pendaftaran, Tracking, & Router WiFi)
     // ==========================================================================
     match /registrations/{ticketId} {
 
@@ -47,22 +49,29 @@ service cloud.firestore {
                       && request.resource.data.phone.size() >= 9
                       && request.resource.data.status in ['menunggu_verifikasi', 'pending'];
 
-      // B. READ (Lacak Status & Pencarian):
-      //    - GET: Pelanggan melacak via Nomor Tiket (ASH-YYMM-XXXX)
-      //    - LIST: Pelanggan mencari via Nomor WhatsApp atau Admin memuat data
+      // B. READ (Lacak Status, Cek Pengguna WiFi, & Pencarian Admin):
+      //    - GET: Pelanggan melacak via Nomor Tiket (ASH-YYMM-XXXX) atau ID Langganan
+      //    - LIST: Pelanggan mencari via Nomor WhatsApp atau Admin memuat data pendaftaran
       allow read: if true;
 
-      // C. UPDATE (Simpan WiFi & Update Status Admin):
-      //    - Pelanggan yang statusnya 'terverifikasi' dapat mengisi wifiSSID & wifiPassword
-      //    - Admin dapat memperbarui status pendaftaran:
-      //      ['menunggu_verifikasi', 'terverifikasi', 'survey', 'jadwal_teknisi', 'pemasangan', 'selesai', 'ditolak']
-      //    - Admin dapat menginput nama teknisi bertugas dan catatan progres
+      // C. UPDATE:
+      //    - Pelanggan mengubah Nama WiFi (wifiSSID) & Kata Sandi (wifiPassword)
+      //    - Pelanggan memutus/memblokir perangkat asing pada daftar wifiDevices
+      //    - Admin menginput/mengelola daftar pengguna WiFi (wifiDevices)
+      //    - Admin memperbarui status pemasangan:
+      //      ['menunggu_verifikasi', 'terverifikasi', 'survey', 'jadwal_teknisi', 'pemasangan', 'selesai', 'aktif', 'ditolak']
+      //    - Admin menginput nama teknisi bertugas dan catatan progres
       allow update: if true;
 
       // D. DELETE (Hapus Permanen):
       //    - Memungkinkan tombol "Hapus Permanen" pada Panel Admin berfungsi
       //      tanpa error permission-denied
       allow delete: if true;
+
+      // Sub-koleksi untuk perangkat terhubung jika router melakukan sync terpisah
+      match /devices/{deviceId} {
+        allow read, write: if true;
+      }
     }
 
     // ==========================================================================
@@ -73,8 +82,11 @@ service cloud.firestore {
     }
 
     match /settings/{docId} {
-      allow read: if true;
-      allow write: if request.auth != null;
+      allow read, write: if true;
+    }
+
+    match /wifi_devices/{deviceId} {
+      allow read, write: if true;
     }
 
     // ==========================================================================
