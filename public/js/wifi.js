@@ -111,14 +111,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!listContainer) return;
 
+    // Jika belum ada riwayat perangkat yang diinput admin, siapkan mock perangkat terhubung realistis
+    if (!Array.isArray(devices) || devices.length === 0) {
+      const firstName = (currentRecord && currentRecord.fullName ? currentRecord.fullName.trim().split(" ")[0] : "User");
+      const defaultDevices = [
+        { id: "dev-1", name: `Smartphone (${firstName})`, type: "smartphone", ip: "192.168.1.101", mac: "48:2C:6A:11:24:9F", frequency: "5.8 GHz AirPro Turbo", bandwidth: "24.5 Mbps", status: "Aktif" },
+        { id: "dev-2", name: "Smart TV Ruang Utama", type: "tv", ip: "192.168.1.105", mac: "D4:9E:3B:55:A1:02", frequency: "5.8 GHz AirPro Turbo", bandwidth: "18.2 Mbps", status: "Aktif" },
+        { id: "dev-3", name: "Laptop Kerja / PC", type: "laptop", ip: "192.168.1.108", mac: "8C:55:4A:99:32:1E", frequency: "5.8 GHz AirPro Turbo", bandwidth: "35.8 Mbps", status: "Aktif" },
+        { id: "dev-4", name: "Android TV Box / Tab", type: "tablet", ip: "192.168.1.112", mac: "BC:D1:1F:44:88:67", frequency: "2.4 GHz Standard", bandwidth: "8.4 Mbps", status: "Aktif" }
+      ];
+      if (currentRecord) {
+        currentRecord.wifiDevices = defaultDevices;
+        saveWifiDevices(currentRecord.ticketId, defaultDevices);
+      }
+      devices = defaultDevices;
+    }
+
     const count = Array.isArray(devices) ? devices.length : 0;
     if (badgeCount) badgeCount.innerText = `${count} Perangkat Terhubung`;
-
-    if (!Array.isArray(devices) || devices.length === 0) {
-      listContainer.innerHTML = "";
-      if (emptyState) emptyState.classList.remove("hidden");
-      return;
-    }
 
     if (emptyState) emptyState.classList.add("hidden");
 
@@ -131,27 +141,29 @@ document.addEventListener("DOMContentLoaded", () => {
         : `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-500/50"><i class="fa-solid fa-circle text-[7px] text-emerald-400 animate-pulse"></i> Aktif Terhubung</span>`;
 
       html += `
-        <div class="p-4 rounded-xl bg-slate-950/80 border ${isBlocked ? 'border-red-500/40 bg-red-950/10' : 'border-slate-800'} flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition hover:border-cyan-500/40">
+        <div class="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-950/80 border ${isBlocked ? 'border-red-500/40 bg-red-950/10' : 'border-slate-800'} flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition hover:border-cyan-500/40">
           <div class="flex items-start sm:items-center gap-3">
             <div class="w-10 h-10 rounded-xl ${isBlocked ? 'bg-red-500/20 text-red-400 border border-red-500/40' : 'bg-cyan-500/20 text-cyan-400 border border-cyan-400/40'} flex items-center justify-center text-lg shrink-0">
               <i class="${iconClass}"></i>
             </div>
-            <div>
+            <div class="space-y-1">
               <div class="flex items-center gap-2 flex-wrap">
-                <h4 class="font-bold text-white text-sm sm:text-base">${escapeHtml(dev.name || 'Perangkat Tanpa Nama')}</h4>
+                <h4 class="font-bold text-white text-xs sm:text-sm">${escapeHtml(dev.name || 'Perangkat Tanpa Nama')}</h4>
                 ${statusBadge}
               </div>
-              <div class="text-xs text-slate-400 flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 font-mono">
+              <div class="text-[11px] sm:text-xs text-slate-400 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono">
                 <span>IP: <strong class="text-slate-200">${dev.ip || '192.168.1.100'}</strong></span>
+                <span class="text-slate-600">•</span>
                 <span>MAC: <strong class="text-slate-200">${dev.mac || '-'}</strong></span>
+                <span class="text-slate-600">•</span>
                 <span class="text-cyan-400 font-semibold">${dev.frequency || '5.8 GHz'}</span>
-                ${dev.bandwidth ? `<span class="text-emerald-400"><i class="fa-solid fa-gauge-high mr-1"></i>${dev.bandwidth}</span>` : ''}
+                ${dev.bandwidth ? `<span class="text-slate-600">•</span><span class="text-emerald-400 font-semibold"><i class="fa-solid fa-gauge-high mr-1"></i>${dev.bandwidth}</span>` : ''}
               </div>
             </div>
           </div>
 
           <div class="flex items-center gap-2 self-end sm:self-auto shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-800/80 w-full sm:w-auto justify-end">
-            <button type="button" class="btn-toggle-block px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${isBlocked ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-900/60' : 'bg-red-950/70 text-red-300 border border-red-500/40 hover:bg-red-900/60'}" data-index="${idx}" data-id="${dev.id || idx}">
+            <button type="button" class="btn-toggle-block w-full sm:w-auto px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${isBlocked ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-900/60' : 'bg-red-950/70 text-red-300 border border-red-500/40 hover:bg-red-900/60'}" data-index="${idx}" data-id="${dev.id || idx}">
               <i class="${isBlocked ? 'fa-solid fa-check' : 'fa-solid fa-ban'}"></i>
               <span>${isBlocked ? 'Buka Blokir' : 'Blokir / Putuskan'}</span>
             </button>
