@@ -1,3 +1,5 @@
-/tracking    /tracking.html    200
-/admin       /admin.html       200
-/beranda     /index.html       200
+/tracking        /tracking.html    200
+/admin           /admin.html       200
+/wifi-manager    /wifi.html        200
+/wifi            /wifi.html        200
+/beranda         /index.html       200

@@ -1,11 +1,13 @@
 // Ashtatic Internet Solution - Admin Dashboard Script
-import { getAdminRegistrations, updateRegistrationStatus, deleteRegistrationPermanently } from "./firebase-config.js";
+import { getAdminRegistrations, updateRegistrationStatus, deleteRegistrationPermanently, saveWifiDevices } from "./firebase-config.js";
 import { showToast, showCustomConfirm } from "./toast.js";
 
 let adminRegistrations = [];
 let currentFilter = "all";
 let currentSearch = "";
 let selectedTicketForModal = null;
+let activeAdminWifiTicket = null;
+let activeAdminWifiDevices = [];
 
 const ADMIN_PASS_KEY = "ashtatic_admin_token";
 const DEFAULT_PIN = "ashtatic2026";
@@ -17,6 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupModalEvents();
   setupExport();
   setupManualAdd();
+  setupAdminWifiModalEvents();
 });
 
 // Autentikasi Admin Sederhana & Aman
@@ -268,6 +271,9 @@ function renderTable() {
             <button class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-400 hover:text-cyan-300 transition text-xs btn-view-detail" data-ticket="${item.ticketId}" title="Lihat Detail Lengkap">
               <i class="fa-solid fa-eye"></i>
             </button>
+            <button class="p-1.5 rounded-lg bg-indigo-950/70 hover:bg-indigo-900 border border-indigo-500/40 text-indigo-300 hover:text-white transition text-xs font-semibold px-2 btn-manage-wifi" data-ticket="${item.ticketId}" title="Kelola Pengguna WiFi">
+              <i class="fa-solid fa-users-gear mr-1"></i> WiFi
+            </button>
             <button class="p-1.5 rounded-lg bg-cyan-950/60 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 transition text-xs font-semibold px-2.5 btn-edit-status" data-ticket="${item.ticketId}" title="Update Status Pendaftaran">
               <i class="fa-solid fa-pen-to-square mr-1"></i> Ubah
             </button>
@@ -324,6 +330,9 @@ function renderTable() {
           <div class="flex items-center gap-1.5">
             <button class="p-2 rounded-lg bg-slate-800 text-cyan-400 text-xs btn-view-detail" data-ticket="${item.ticketId}" title="Detail">
               <i class="fa-solid fa-eye"></i>
+            </button>
+            <button class="p-2 rounded-lg bg-indigo-950/80 border border-indigo-500/40 text-indigo-300 hover:text-white text-xs btn-manage-wifi" data-ticket="${item.ticketId}" title="Kelola Pengguna WiFi">
+              <i class="fa-solid fa-users-gear"></i>
             </button>
             <button class="px-2.5 py-1.5 rounded-lg bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 text-xs font-semibold btn-edit-status" data-ticket="${item.ticketId}" title="Ubah Status">
               <i class="fa-solid fa-pen-to-square mr-1"></i> Ubah
@@ -390,6 +399,14 @@ function bindTableActions() {
       const ticket = btn.getAttribute("data-ticket");
       const item = adminRegistrations.find(d => d.ticketId === ticket);
       if (item) showDetailModal(item);
+    });
+  });
+
+  // Manage WiFi Devices button
+  document.querySelectorAll(".btn-manage-wifi").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const ticket = btn.getAttribute("data-ticket");
+      openAdminWifiModal(ticket);
     });
   });
 
@@ -766,4 +783,322 @@ function setupManualAdd() {
       }
     });
   }
+}
+
+// ========================================================
+// MANAJEMEN PENGGUNA & PERANGKAT WIFI PELANGGAN OLEH ADMIN
+// ========================================================
+function setupAdminWifiModalEvents() {
+  const btnOpenGlobal = document.getElementById("btnOpenGlobalWifiModal");
+  const modal = document.getElementById("adminWifiModal");
+  const btnClose = document.getElementById("btnCloseAdminWifiModal");
+  const btnCancel = document.getElementById("btnCancelAdminWifi");
+  const selectCustomer = document.getElementById("selectWifiCustomer");
+  const formAdd = document.getElementById("formAddWifiDevice");
+  const btnAutoFill = document.getElementById("btnAutoFillSampleDevices");
+  const btnSave = document.getElementById("btnSaveAdminWifiDevices");
+
+  if (btnOpenGlobal) {
+    btnOpenGlobal.addEventListener("click", () => {
+      if (adminRegistrations.length === 0) {
+        showToast("Belum ada data pelanggan untuk dikelola.", "warning");
+        return;
+      }
+      openAdminWifiModal(adminRegistrations[0].ticketId);
+    });
+  }
+
+  const closeModal = () => {
+    if (modal) {
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+  };
+
+  if (btnClose) btnClose.addEventListener("click", closeModal);
+  if (btnCancel) btnCancel.addEventListener("click", closeModal);
+
+  // Ganti Pelanggan Terpilih
+  if (selectCustomer) {
+    selectCustomer.addEventListener("change", (e) => {
+      const ticket = e.target.value;
+      if (ticket) loadCustomerWifiData(ticket);
+    });
+  }
+
+  // Tambah Perangkat Baru Manual
+  if (formAdd) {
+    formAdd.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (!activeAdminWifiTicket) {
+        showToast("Pilih pelanggan terlebih dahulu.", "warning");
+        return;
+      }
+
+      const name = document.getElementById("devInputName").value.trim();
+      const type = document.getElementById("devInputType").value;
+      const ip = document.getElementById("devInputIP").value.trim() || `192.168.1.${100 + activeAdminWifiDevices.length + 1}`;
+      const mac = document.getElementById("devInputMAC").value.trim() || generateMockMAC();
+      const bandwidth = document.getElementById("devInputBandwidth").value.trim() || "15.5 Mbps";
+      const frequency = document.getElementById("devInputFreq").value;
+
+      const newDev = {
+        id: `dev-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        name,
+        type,
+        ip,
+        mac,
+        bandwidth,
+        frequency,
+        status: "Aktif",
+        connectedAt: new Date().toISOString()
+      };
+
+      activeAdminWifiDevices.push(newDev);
+      renderAdminDevicesTable();
+      formAdd.reset();
+      showToast(`Perangkat "${name}" ditambahkan ke daftar!`, "success");
+    });
+  }
+
+  // Isi Template 4 Perangkat Cepat (Demo Realistis)
+  if (btnAutoFill) {
+    btnAutoFill.addEventListener("click", () => {
+      if (!activeAdminWifiTicket) {
+        showToast("Pilih pelanggan terlebih dahulu.", "warning");
+        return;
+      }
+
+      const samples = [
+        {
+          id: `dev-${Date.now()}-1`,
+          name: "iPhone 14 Pro - Ruang Tamu",
+          type: "smartphone",
+          ip: "192.168.1.102",
+          mac: "B4:8C:9D:12:34:56",
+          bandwidth: "24.5 Mbps",
+          frequency: "5.8 GHz AirPro Turbo",
+          status: "Aktif",
+          connectedAt: new Date().toISOString()
+        },
+        {
+          id: `dev-${Date.now()}-2`,
+          name: "Samsung Galaxy A54 - Dapur",
+          type: "smartphone",
+          ip: "192.168.1.105",
+          mac: "3C:77:E6:AA:BB:CC",
+          bandwidth: "11.2 Mbps",
+          frequency: "2.4 GHz Standard",
+          status: "Aktif",
+          connectedAt: new Date().toISOString()
+        },
+        {
+          id: `dev-${Date.now()}-3`,
+          name: "Smart TV Samsung 55\" - Ruang Keluarga",
+          type: "tv",
+          ip: "192.168.1.110",
+          mac: "D0:03:DF:44:55:66",
+          bandwidth: "38.6 Mbps",
+          frequency: "5.8 GHz AirPro Turbo",
+          status: "Aktif",
+          connectedAt: new Date().toISOString()
+        },
+        {
+          id: `dev-${Date.now()}-4`,
+          name: "Laptop ASUS ROG - Kamar Kerja",
+          type: "laptop",
+          ip: "192.168.1.115",
+          mac: "00:E0:4C:77:88:99",
+          bandwidth: "42.0 Mbps",
+          frequency: "5.8 GHz AirPro Turbo",
+          status: "Aktif",
+          connectedAt: new Date().toISOString()
+        }
+      ];
+
+      activeAdminWifiDevices = [...activeAdminWifiDevices, ...samples];
+      renderAdminDevicesTable();
+      showToast("4 Perangkat sampel otomatis berhasil ditambahkan ke daftar!", "success");
+    });
+  }
+
+  // Simpan Daftar Perangkat ke Database Firestore & Server Node.js
+  if (btnSave) {
+    btnSave.addEventListener("click", async () => {
+      if (!activeAdminWifiTicket) {
+        showToast("Pilih pelanggan terlebih dahulu.", "warning");
+        return;
+      }
+
+      const origText = btnSave.innerHTML;
+      btnSave.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Menyimpan...`;
+      btnSave.disabled = true;
+
+      try {
+        const token = sessionStorage.getItem(ADMIN_PASS_KEY) || DEFAULT_PIN;
+        const res = await saveWifiDevices(activeAdminWifiTicket, activeAdminWifiDevices, token);
+
+        if (res.success) {
+          // Update data di memori admin
+          const item = adminRegistrations.find(d => d.ticketId === activeAdminWifiTicket);
+          if (item) item.wifiDevices = activeAdminWifiDevices;
+
+          showToast(`Berhasil menyimpan ${activeAdminWifiDevices.length} daftar pengguna WiFi!`, "success");
+          renderTable();
+          closeModal();
+        } else {
+          showToast("Gagal menyimpan data perangkat pengguna WiFi.", "error");
+        }
+      } catch (err) {
+        console.error("Save WiFi devices error:", err);
+        showToast("Terjadi kesalahan saat menyimpan perangkat.", "error");
+      } finally {
+        btnSave.innerHTML = origText;
+        btnSave.disabled = false;
+      }
+    });
+  }
+}
+
+// Buka Modal Kelola WiFi untuk Tiket Tertentu
+function openAdminWifiModal(ticketId) {
+  const modal = document.getElementById("adminWifiModal");
+  const selectCustomer = document.getElementById("selectWifiCustomer");
+  if (!modal || !selectCustomer) return;
+
+  // Isi dropdown pilihan pelanggan
+  selectCustomer.innerHTML = adminRegistrations.map(item => {
+    const subId = item.subscriptionId || `ASH-SUB-${(item.ticketId || '').replace(/[^0-9]/g, '')}`;
+    const devCount = Array.isArray(item.wifiDevices) ? item.wifiDevices.length : 0;
+    return `<option value="${item.ticketId}" ${item.ticketId === ticketId ? 'selected' : ''}>${subId} - ${item.fullName} (${devCount} Perangkat)</option>`;
+  }).join("");
+
+  const targetTicket = ticketId || (adminRegistrations[0] ? adminRegistrations[0].ticketId : null);
+  if (targetTicket) {
+    selectCustomer.value = targetTicket;
+    loadCustomerWifiData(targetTicket);
+  }
+
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
+}
+
+// Muat Data WiFi Pelanggan ke Modal
+function loadCustomerWifiData(ticketId) {
+  activeAdminWifiTicket = ticketId;
+  const item = adminRegistrations.find(d => d.ticketId === ticketId);
+  if (!item) return;
+
+  const elName = document.getElementById("adminWifiCustName");
+  const elSSID = document.getElementById("adminWifiCustSSID");
+  const elPass = document.getElementById("adminWifiCustPass");
+
+  if (elName) elName.innerText = item.fullName || "-";
+  if (elSSID) elSSID.innerText = item.wifiSSID || "Ashtatic-AirPro";
+  if (elPass) elPass.innerText = item.wifiPassword || "ashtatic2026";
+
+  activeAdminWifiDevices = Array.isArray(item.wifiDevices) ? JSON.parse(JSON.stringify(item.wifiDevices)) : [];
+  renderAdminDevicesTable();
+}
+
+// Render Tabel Perangkat di Modal Admin
+function renderAdminDevicesTable() {
+  const container = document.getElementById("adminDevicesTableBody");
+  const countEl = document.getElementById("adminDevCount");
+  if (!container) return;
+
+  if (countEl) countEl.innerText = activeAdminWifiDevices.length;
+
+  if (activeAdminWifiDevices.length === 0) {
+    container.innerHTML = `
+      <div class="p-6 text-center text-xs text-slate-500 italic">
+        Belum ada perangkat terdaftar untuk pelanggan ini. Silakan input perangkat baru atau gunakan tombol "Template Sampel Cepat".
+      </div>
+    `;
+    return;
+  }
+
+  let html = "";
+  activeAdminWifiDevices.forEach((dev, idx) => {
+    const isBlocked = (dev.status === "Diblokir");
+    const icon = getAdminDeviceIcon(dev.type);
+
+    html += `
+      <div class="p-3 flex items-center justify-between gap-3 text-xs ${isBlocked ? 'bg-red-950/20' : 'hover:bg-slate-900/60'} transition">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-lg ${isBlocked ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-cyan-500/20 text-cyan-400 border border-cyan-400/30'} flex items-center justify-center shrink-0">
+            <i class="${icon}"></i>
+          </div>
+          <div class="min-w-0">
+            <div class="font-bold text-white truncate flex items-center gap-1.5">
+              <span>${dev.name}</span>
+              <span class="text-[9px] px-1.5 py-0.2 rounded font-mono font-bold ${isBlocked ? 'bg-red-900 text-red-200' : 'bg-emerald-900 text-emerald-200'}">${dev.status || 'Aktif'}</span>
+            </div>
+            <div class="text-[11px] text-slate-400 font-mono flex items-center gap-2 mt-0.5">
+              <span>${dev.ip || '-'}</span>
+              <span>•</span>
+              <span>${dev.mac || '-'}</span>
+              <span>•</span>
+              <span class="text-cyan-400 font-semibold">${dev.bandwidth || '15 Mbps'}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button type="button" class="btn-toggle-dev-status p-1.5 rounded-lg text-xs font-semibold ${isBlocked ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-900' : 'bg-amber-950/80 text-amber-300 border border-amber-500/40 hover:bg-amber-900'}" data-index="${idx}" title="${isBlocked ? 'Buka Blokir' : 'Blokir'}">
+            <i class="${isBlocked ? 'fa-solid fa-unlock' : 'fa-solid fa-lock'}"></i>
+          </button>
+          <button type="button" class="btn-delete-dev p-1.5 rounded-lg bg-red-950/60 text-red-400 border border-red-500/30 hover:bg-red-900 text-xs" data-index="${idx}" title="Hapus Perangkat">
+            <i class="fa-regular fa-trash-can"></i>
+          </button>
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+
+  // Listener Toggle Status & Hapus
+  container.querySelectorAll(".btn-toggle-dev-status").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const idx = parseInt(e.currentTarget.getAttribute("data-index"), 10);
+      if (activeAdminWifiDevices[idx]) {
+        activeAdminWifiDevices[idx].status = (activeAdminWifiDevices[idx].status === "Diblokir") ? "Aktif" : "Diblokir";
+        renderAdminDevicesTable();
+      }
+    });
+  });
+
+  container.querySelectorAll(".btn-delete-dev").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const idx = parseInt(e.currentTarget.getAttribute("data-index"), 10);
+      if (activeAdminWifiDevices[idx]) {
+        const removed = activeAdminWifiDevices.splice(idx, 1);
+        renderAdminDevicesTable();
+        showToast(`Perangkat "${removed[0].name}" dihapus dari daftar.`, "info", 1500);
+      }
+    });
+  });
+}
+
+function getAdminDeviceIcon(type) {
+  switch ((type || "").toLowerCase()) {
+    case "laptop": return "fa-solid fa-laptop";
+    case "tv": case "smart_tv": return "fa-solid fa-tv";
+    case "tablet": return "fa-solid fa-tablet-screen-button";
+    case "desktop": case "pc": return "fa-solid fa-desktop";
+    case "iot": case "cctv": return "fa-solid fa-microchip";
+    case "console": return "fa-solid fa-gamepad";
+    default: return "fa-solid fa-mobile-screen";
+  }
+}
+
+function generateMockMAC() {
+  const hex = "0123456789ABCDEF";
+  let mac = "";
+  for (let i = 0; i < 6; i++) {
+    mac += hex[Math.floor(Math.random() * 16)] + hex[Math.floor(Math.random() * 16)];
+    if (i < 5) mac += ":";
+  }
+  return mac;
 }

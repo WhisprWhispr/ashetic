@@ -222,6 +222,175 @@ app.post("/api/tracking/wifi-config/:ticketId", async (req, res) => {
   }
 });
 
+// 2c. Cek Pengguna WiFi berdasarkan ID Langganan / Tiket (GET /api/wifi/devices/:query)
+app.get("/api/wifi/devices/:query", async (req, res) => {
+  try {
+    const rawQuery = decodeURIComponent(req.params.query).trim().toUpperCase();
+    const cleanNumbers = rawQuery.replace(/[^0-9]/g, "");
+
+    const list = await readRegistrations();
+    const matched = list.find(item => {
+      const itemTicket = (item.ticketId || "").toUpperCase();
+      const itemSubId = (item.subscriptionId || `ASH-SUB-${itemTicket.replace(/[^0-9]/g, '')}`).toUpperCase();
+      const itemTicketNum = itemTicket.replace(/[^0-9]/g, "");
+
+      return itemTicket === rawQuery ||
+             itemSubId === rawQuery ||
+             (cleanNumbers.length >= 4 && (itemSubId.includes(cleanNumbers) || itemTicketNum.endsWith(cleanNumbers)));
+    });
+
+    if (matched) {
+      // Pastikan ID Langganan ada
+      if (!matched.subscriptionId) {
+        matched.subscriptionId = `ASH-SUB-${(matched.ticketId || '').replace(/[^0-9]/g, '')}`;
+      }
+      return res.json({
+        success: true,
+        registration: {
+          ticketId: matched.ticketId,
+          subscriptionId: matched.subscriptionId,
+          fullName: matched.fullName,
+          packageName: matched.packageName || "Paket AirPro",
+          packageSpeed: matched.packageSpeed || "150 Mbps",
+          wifiSSID: matched.wifiSSID || "Ashtatic-AirPro",
+          wifiPassword: matched.wifiPassword || "ashtatic2026",
+          status: matched.status,
+          wifiDevices: matched.wifiDevices || []
+        }
+      });
+    }
+
+    return res.status(404).json({
+      success: false,
+      message: "ID Langganan atau Nomor Tiket tidak ditemukan. Silakan periksa kembali."
+    });
+  } catch (error) {
+    console.error("API Get WiFi Devices error:", error);
+    return res.status(500).json({ success: false, message: "Terjadi kesalahan pada server." });
+  }
+});
+
+// 2d. Update Nama WiFi & Password via ID Langganan (POST /api/wifi/update-credentials)
+app.post("/api/wifi/update-credentials", async (req, res) => {
+  try {
+    const { query, wifiSSID, wifiPassword } = req.body;
+    if (!query || !wifiSSID || !wifiPassword) {
+      return res.status(400).json({ success: false, message: "ID Langganan, Nama WiFi, dan Kata Sandi wajib diisi." });
+    }
+    if (wifiPassword.length < 8) {
+      return res.status(400).json({ success: false, message: "Kata sandi WiFi minimal harus 8 karakter." });
+    }
+
+    const cleanQuery = query.trim().toUpperCase();
+    const list = await readRegistrations();
+    const index = list.findIndex(item => {
+      const itemTicket = (item.ticketId || "").toUpperCase();
+      const itemSubId = (item.subscriptionId || `ASH-SUB-${itemTicket.replace(/[^0-9]/g, '')}`).toUpperCase();
+      return itemTicket === cleanQuery || itemSubId === cleanQuery;
+    });
+
+    if (index === -1) {
+      return res.status(404).json({ success: false, message: "Data langganan tidak ditemukan." });
+    }
+
+    list[index].wifiSSID = wifiSSID.trim();
+    list[index].wifiPassword = wifiPassword;
+    list[index].wifiConfiguredAt = new Date().toISOString();
+    list[index].updatedAt = new Date().toISOString();
+
+    await saveRegistrations(list);
+    return res.json({
+      success: true,
+      message: "Nama WiFi (SSID) & Kata Sandi berhasil diperbarui!",
+      data: {
+        ticketId: list[index].ticketId,
+        subscriptionId: list[index].subscriptionId,
+        wifiSSID: list[index].wifiSSID,
+        wifiPassword: list[index].wifiPassword
+      }
+    });
+  } catch (error) {
+    console.error("API Update WiFi Credentials error:", error);
+    return res.status(500).json({ success: false, message: "Gagal memperbarui data WiFi." });
+  }
+});
+
+// 2e. Toggle Blokir / Putuskan Perangkat oleh Pelanggan (POST /api/wifi/toggle-block-device)
+app.post("/api/wifi/toggle-block-device", async (req, res) => {
+  try {
+    const { query, deviceId } = req.body;
+    if (!query || !deviceId) {
+      return res.status(400).json({ success: false, message: "Parameter tidak lengkap." });
+    }
+
+    const cleanQuery = query.trim().toUpperCase();
+    const list = await readRegistrations();
+    const index = list.findIndex(item => {
+      const itemTicket = (item.ticketId || "").toUpperCase();
+      const itemSubId = (item.subscriptionId || `ASH-SUB-${itemTicket.replace(/[^0-9]/g, '')}`).toUpperCase();
+      return itemTicket === cleanQuery || itemSubId === cleanQuery;
+    });
+
+    if (index === -1) {
+      return res.status(404).json({ success: false, message: "Data tidak ditemukan." });
+    }
+
+    const devices = list[index].wifiDevices || [];
+    const devIndex = devices.findIndex(d => d.id === deviceId);
+    if (devIndex === -1) {
+      return res.status(404).json({ success: false, message: "Perangkat tidak ditemukan di daftar." });
+    }
+
+    devices[devIndex].status = (devices[devIndex].status === "Diblokir") ? "Aktif" : "Diblokir";
+    list[index].wifiDevices = devices;
+    list[index].updatedAt = new Date().toISOString();
+
+    await saveRegistrations(list);
+    return res.json({
+      success: true,
+      message: `Status perangkat "${devices[devIndex].name}" berhasil diubah menjadi ${devices[devIndex].status}.`,
+      devices
+    });
+  } catch (error) {
+    console.error("API Toggle Block error:", error);
+    return res.status(500).json({ success: false, message: "Gagal mengubah status perangkat." });
+  }
+});
+
+// 2f. Admin: Simpan / Kelola Daftar Pengguna WiFi Pelanggan (POST /api/admin/wifi-devices/:ticketId)
+app.post("/api/admin/wifi-devices/:ticketId", verifyAdmin, async (req, res) => {
+  try {
+    const ticketId = req.params.ticketId;
+    const { wifiDevices } = req.body;
+
+    if (!Array.isArray(wifiDevices)) {
+      return res.status(400).json({ success: false, message: "Daftar perangkat harus berupa array." });
+    }
+
+    const list = await readRegistrations();
+    const index = list.findIndex(d => (d.ticketId || "").toUpperCase() === ticketId.toUpperCase());
+
+    if (index === -1) {
+      return res.status(404).json({ success: false, message: "Tiket pelanggan tidak ditemukan." });
+    }
+
+    list[index].wifiDevices = wifiDevices;
+    list[index].updatedAt = new Date().toISOString();
+
+    await saveRegistrations(list);
+    console.log(`[ADMIN WIFI DEVICES] Diperbarui ${wifiDevices.length} perangkat untuk tiket ${ticketId}`);
+
+    return res.json({
+      success: true,
+      message: `Berhasil menyimpan ${wifiDevices.length} daftar pengguna WiFi untuk tiket ${ticketId}.`,
+      wifiDevices: list[index].wifiDevices
+    });
+  } catch (error) {
+    console.error("API Admin WiFi Devices error:", error);
+    return res.status(500).json({ success: false, message: "Gagal menyimpan data perangkat pengguna." });
+  }
+});
+
 // 3. Admin: Ambil Semua Registrasi (GET /api/admin/registrations)
 app.get("/api/admin/registrations", verifyAdmin, async (req, res) => {
   try {
@@ -311,6 +480,10 @@ app.get("/tracking", (req, res) => {
 
 app.get("/admin", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin.html"));
+});
+
+app.get(["/wifi", "/wifi-manager"], (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "wifi.html"));
 });
 
 // Catch-all route to index.html for SPA-friendly behavior

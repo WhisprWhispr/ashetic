@@ -325,3 +325,169 @@ export async function saveWifiConfiguration(ticketId, wifiSSID, wifiPassword) {
     savedServer
   };
 }
+
+/**
+ * AMBIL PENGGUNA & PERANGKAT WIFI BERDASARKAN ID LANGGANAN / NOMOR TIKET
+ */
+export async function getWifiDevicesBySubscription(queryId) {
+  const clean = (queryId || "").trim().toUpperCase();
+  if (!clean) return { success: false, message: "ID Langganan tidak boleh kosong." };
+
+  // 1. Cek langsung ke Firebase Firestore
+  if (isFirestoreAvailable && db) {
+    try {
+      // Coba jika query adalah Ticket ID (Doc ID)
+      const docRef = doc(db, "registrations", clean);
+      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+        const item = snap.data();
+        if (!item.subscriptionId) item.subscriptionId = `ASH-SUB-${item.ticketId.replace(/[^0-9]/g, '')}`;
+        return { success: true, registration: item, source: "firestore" };
+      }
+
+      // Coba query berdasarkan field subscriptionId
+      const regCol = collection(db, "registrations");
+      const qSub = query(regCol, where("subscriptionId", "==", clean));
+      const qSnap = await getDocs(qSub);
+      if (!qSnap.empty) {
+        return { success: true, registration: qSnap.docs[0].data(), source: "firestore" };
+      }
+
+      // Coba scan collection jika formatnya variasi (misal tiket tanpa prefix atau subId)
+      const allDocs = await getDocs(regCol);
+      for (const d of allDocs.docs) {
+        const data = d.data();
+        const tId = (data.ticketId || "").toUpperCase();
+        const sId = (data.subscriptionId || `ASH-SUB-${tId.replace(/[^0-9]/g, '')}`).toUpperCase();
+        if (tId === clean || sId === clean || (clean.length >= 4 && (sId.includes(clean) || tId.includes(clean)))) {
+          if (!data.subscriptionId) data.subscriptionId = sId;
+          return { success: true, registration: data, source: "firestore" };
+        }
+      }
+    } catch (fsErr) {
+      console.warn("⚠️ Firestore WiFi fetch error, fallback to API:", fsErr.message);
+    }
+  }
+
+  // 2. Fallback ke API Server Node.js
+  try {
+    const res = await fetch(`/api/wifi/devices/${encodeURIComponent(clean)}`);
+    const data = await res.json();
+    if (data.success && data.registration) {
+      return { success: true, registration: data.registration, source: "server" };
+    }
+    return { success: false, message: data.message || "Data tidak ditemukan." };
+  } catch (err) {
+    console.warn("⚠️ Server WiFi fetch error:", err);
+  }
+
+  return { success: false, message: "ID Langganan atau Nomor Tiket tidak ditemukan." };
+}
+
+/**
+ * SIMPAN DAFTAR PENGGUNA WIFI OLEH ADMIN
+ */
+export async function saveWifiDevices(ticketId, wifiDevices, adminToken = "") {
+  let savedFirestore = false;
+  let savedServer = false;
+
+  // 1. Simpan ke Firestore
+  if (isFirestoreAvailable && db) {
+    try {
+      const docRef = doc(db, "registrations", ticketId);
+      await updateDoc(docRef, {
+        wifiDevices: wifiDevices,
+        updatedAt: new Date().toISOString()
+      });
+      savedFirestore = true;
+      console.log(`✅ ${wifiDevices.length} Perangkat WiFi berhasil disimpan di Firestore: ${ticketId}`);
+    } catch (fsErr) {
+      console.warn("⚠️ Gagal simpan wifiDevices ke Firestore:", fsErr.message);
+    }
+  }
+
+  // 2. Simpan ke Server Node.js
+  try {
+    const res = await fetch(`/api/admin/wifi-devices/${encodeURIComponent(ticketId)}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${adminToken}`
+      },
+      body: JSON.stringify({ wifiDevices })
+    });
+    const data = await res.json();
+    if (data.success) {
+      savedServer = true;
+      console.log(`✅ ${wifiDevices.length} Perangkat WiFi berhasil disinkronkan ke server: ${ticketId}`);
+    }
+  } catch (err) {
+    console.warn("⚠️ Gagal sinkron wifiDevices ke server:", err);
+  }
+
+  return {
+    success: savedFirestore || savedServer,
+    savedFirestore,
+    savedServer
+  };
+}
+
+/**
+ * GANTI NAMA WIFI & SANDI OLEH PELANGGAN
+ */
+export async function updateWifiCredentials(queryId, wifiSSID, wifiPassword) {
+  let savedFirestore = false;
+  let savedServer = false;
+
+  // 1. Simpan ke Server
+  try {
+    const res = await fetch("/api/wifi/update-credentials", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query: queryId, wifiSSID, wifiPassword })
+    });
+    const data = await res.json();
+    if (data.success) {
+      savedServer = true;
+    }
+  } catch (err) {
+    console.warn("⚠️ Gagal update wifi credentials ke server:", err);
+  }
+
+  // 2. Simpan ke Firestore jika ada ticketId
+  if (isFirestoreAvailable && db) {
+    try {
+      // Cari dokumen yang cocok
+      const clean = (queryId || "").toUpperCase();
+      let targetTicket = clean;
+      
+      const docRef = doc(db, "registrations", targetTicket);
+      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+        await updateDoc(docRef, {
+          wifiSSID: wifiSSID.trim(),
+          wifiPassword: wifiPassword,
+          wifiConfiguredAt: new Date().toISOString()
+        });
+        savedFirestore = true;
+      } else {
+        // Query by subscriptionId
+        const regCol = collection(db, "registrations");
+        const qSub = query(regCol, where("subscriptionId", "==", clean));
+        const qSnap = await getDocs(qSub);
+        if (!qSnap.empty) {
+          await updateDoc(doc(db, "registrations", qSnap.docs[0].id), {
+            wifiSSID: wifiSSID.trim(),
+            wifiPassword: wifiPassword,
+            wifiConfiguredAt: new Date().toISOString()
+          });
+          savedFirestore = true;
+        }
+      }
+    } catch (fsErr) {
+      console.warn("⚠️ Gagal simpan WiFi credentials ke Firestore:", fsErr.message);
+    }
+  }
+
+  return { success: savedFirestore || savedServer };
+}

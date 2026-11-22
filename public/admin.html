@@ -62,6 +62,9 @@
 
         <!-- Admin Actions -->
         <div class="flex items-center gap-2">
+          <button id="btnOpenGlobalWifiModal" class="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-indigo-950/80 border border-indigo-500/40 text-indigo-300 hover:text-white text-xs font-bold flex items-center gap-1.5 transition" title="Kelola Pengguna WiFi Pelanggan">
+            <i class="fa-solid fa-users-gear text-indigo-400 text-xs"></i> <span class="hidden sm:inline">Pengguna WiFi</span>
+          </button>
           <button id="btnOpenManualAdd" class="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 hover:text-white text-xs font-bold flex items-center gap-1.5 transition">
             <i class="fa-solid fa-plus text-xs"></i> <span class="hidden sm:inline">Tambah Manual</span>
           </button>
@@ -433,6 +436,125 @@
           Simpan Registrasi Manual
         </button>
       </form>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL KELOLA PENGGUNA WIFI PELANGGAN OLEH ADMIN -->
+  <!-- ======================================================== -->
+  <div id="adminWifiModal" class="hidden fixed inset-0 z-50 items-center justify-center p-3 sm:p-4 modal-backdrop overflow-y-auto">
+    <div class="w-full max-w-2xl bg-[#08102a] border border-cyan-400/50 rounded-2xl sm:rounded-3xl p-5 sm:p-7 space-y-4 my-auto max-h-[94vh] overflow-y-auto shadow-2xl">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-400/40 flex items-center justify-center text-lg shrink-0">
+            <i class="fa-solid fa-users-gear"></i>
+          </div>
+          <div>
+            <span class="text-[10px] uppercase font-bold text-cyan-400 tracking-wider">MANAJEMEN ROUTER AIRPRO</span>
+            <h3 class="text-base sm:text-lg font-black text-white">Kelola Pengguna WiFi Pelanggan</h3>
+          </div>
+        </div>
+        <button id="btnCloseAdminWifiModal" class="text-slate-400 hover:text-white text-xl p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Pemilih Pelanggan / ID Langganan -->
+      <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2">
+        <label class="block text-xs font-bold text-slate-300">
+          <i class="fa-solid fa-user-check text-cyan-400 mr-1"></i> Pilih Pelanggan (ID Langganan / Tiket)
+        </label>
+        <select id="selectWifiCustomer" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-mono focus:outline-none focus:border-cyan-400">
+          <!-- Injected dynamically from adminRegistrations -->
+        </select>
+        <div class="flex flex-wrap items-center justify-between text-xs text-slate-400 pt-1">
+          <div>Nama: <strong id="adminWifiCustName" class="text-white">-</strong></div>
+          <div>SSID: <strong id="adminWifiCustSSID" class="text-cyan-400 font-mono">-</strong></div>
+          <div>Sandi: <strong id="adminWifiCustPass" class="text-amber-300 font-mono">-</strong></div>
+        </div>
+      </div>
+
+      <!-- Form Tambah Perangkat Baru -->
+      <div class="p-4 rounded-xl bg-gradient-to-r from-slate-900/90 via-cyan-950/40 to-slate-900/90 border border-cyan-500/30 space-y-3">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <h4 class="font-bold text-xs uppercase tracking-wider text-cyan-300 flex items-center gap-1.5">
+            <i class="fa-solid fa-plus-circle"></i> Input Pengguna / Perangkat Baru
+          </h4>
+          <button type="button" id="btnAutoFillSampleDevices" class="text-[11px] font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-1 px-2.5 py-1 rounded bg-cyan-950/80 border border-cyan-500/40 transition" title="Isi otomatis 4 perangkat sampel (iPhone, Samsung, TV, Laptop)">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> + Template Sampel Cepat
+          </button>
+        </div>
+
+        <form id="formAddWifiDevice" class="space-y-3">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+            <div class="sm:col-span-2">
+              <label class="block text-slate-400 mb-1 font-semibold">Nama Perangkat *</label>
+              <input type="text" id="devInputName" required placeholder="Contoh: iPhone 13 - Ruang Tamu" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs focus:border-cyan-400 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1 font-semibold">Tipe Perangkat</label>
+              <select id="devInputType" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs">
+                <option value="smartphone">Smartphone / HP</option>
+                <option value="laptop">Laptop</option>
+                <option value="tv">Smart TV</option>
+                <option value="tablet">Tablet / iPad</option>
+                <option value="pc">Komputer PC</option>
+                <option value="iot">CCTV / IoT</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+            <div>
+              <label class="block text-slate-400 mb-1 font-semibold">IP Address</label>
+              <input type="text" id="devInputIP" placeholder="192.168.1.102" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white font-mono text-xs">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1 font-semibold">MAC Address</label>
+              <input type="text" id="devInputMAC" placeholder="B4:8C:9D:12:34:56" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white font-mono text-xs">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1 font-semibold">Bandwidth</label>
+              <input type="text" id="devInputBandwidth" placeholder="15.2 Mbps" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1 font-semibold">Frekuensi</label>
+              <select id="devInputFreq" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs">
+                <option value="5.8 GHz AirPro Turbo">5.8 GHz AirPro Turbo</option>
+                <option value="2.4 GHz Standard">2.4 GHz Standard</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="flex justify-end pt-1">
+            <button type="submit" class="px-4 py-2 rounded-xl btn-neon-cyan text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-md">
+              <i class="fa-solid fa-plus"></i> Tambah ke Daftar
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Tabel Daftar Perangkat Yang Sudah Ada -->
+      <div class="space-y-2">
+        <div class="flex items-center justify-between text-xs font-bold text-slate-300">
+          <span>Daftar Perangkat Pengguna (<span id="adminDevCount">0</span>)</span>
+          <span class="text-[11px] text-slate-500 font-normal">Data ini yang akan muncul di menu cek pengguna pelanggan</span>
+        </div>
+
+        <div class="max-h-60 overflow-y-auto rounded-xl border border-slate-800 bg-slate-950/90 divide-y divide-slate-800" id="adminDevicesTableBody">
+          <!-- Injected via JavaScript -->
+        </div>
+      </div>
+
+      <!-- Action Footer -->
+      <div class="flex items-center justify-between pt-3 border-t border-slate-800">
+        <button type="button" id="btnCancelAdminWifi" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold">
+          Tutup
+        </button>
+        <button type="button" id="btnSaveAdminWifiDevices" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-black text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-lg">
+          <i class="fa-solid fa-cloud-arrow-up"></i> Simpan ke Database
+        </button>
+      </div>
     </div>
   </div>
 
