@@ -393,8 +393,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (currentWeight === -1) {
         stateClass = "opacity-40";
+      } else if (currentWeight >= 6 && stepNum === 6) {
+        // Status Selesai: Tahap ke-6 selesai tuntas & centang hijau bersinar
+        stateClass = "text-emerald-400 border-emerald-400 bg-emerald-950/80 shadow-[0_0_18px_rgba(52,211,153,0.6)]";
+        icon = `<i class="fa-solid fa-check text-sm font-black"></i>`;
       } else if (stepNum < currentWeight) {
-        stateClass = "text-emerald-400 border-emerald-500";
+        stateClass = "text-emerald-400 border-emerald-500 bg-emerald-950/40";
         icon = `<i class="fa-solid fa-check"></i>`;
       } else if (stepNum === currentWeight) {
         stateClass = "text-cyan-400 border-cyan-400 bg-cyan-950/50 shadow-[0_0_15px_rgba(0,240,255,0.6)]";
@@ -404,17 +408,22 @@ document.addEventListener("DOMContentLoaded", () => {
         icon = stepNum;
       }
 
+      const isLineActive = (currentWeight >= 6) ? true : (stepNum < currentWeight);
+
       html += `
         <div class="flex items-start gap-3 sm:gap-4 mb-5 sm:mb-6 relative">
           ${idx < steps.length - 1 ? `
-            <div class="absolute left-4 sm:left-5 top-10 w-0.5 h-12 ${stepNum < currentWeight ? 'bg-emerald-500' : 'bg-slate-700'}"></div>
+            <div class="absolute left-4 sm:left-5 top-10 w-0.5 h-12 ${isLineActive ? 'bg-emerald-500 shadow-[0_0_8px_rgba(52,211,153,0.5)]' : 'bg-slate-700'}"></div>
           ` : ''}
           <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs sm:text-sm shrink-0 z-10 ${stateClass}">
             ${icon}
           </div>
           <div>
-            <h4 class="font-bold text-sm sm:text-base ${stepNum <= currentWeight ? 'text-white' : 'text-slate-400'}">${step.title}</h4>
-            <p class="text-xs text-slate-400 mt-0.5 leading-relaxed">${step.desc}</p>
+            <h4 class="font-bold text-sm sm:text-base ${stepNum <= currentWeight ? (currentWeight >= 6 && stepNum === 6 ? 'text-emerald-300 font-extrabold flex items-center gap-2' : 'text-white') : 'text-slate-400'}">
+              ${step.title}
+              ${currentWeight >= 6 && stepNum === 6 ? '<span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-900/90 text-emerald-300 border border-emerald-400/60 uppercase font-bold tracking-wider">Aktif</span>' : ''}
+            </h4>
+            <p class="text-xs ${currentWeight >= 6 && stepNum === 6 ? 'text-emerald-400/90 font-medium' : 'text-slate-400'} mt-0.5 leading-relaxed">${step.desc}</p>
           </div>
         </div>
       `;
